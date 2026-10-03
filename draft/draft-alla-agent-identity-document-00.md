@@ -184,8 +184,8 @@ base domain and nothing else.
 
 ## Location
 
-The Agent Identity Document is a JSON document {{RFC8259}} served over HTTPS at
-the well-known URI {{RFC8615}}
+The Agent Identity Document is a JSON document {{RFC8259}} served over HTTPS
+{{RFC9110}} at the well-known URI {{RFC8615}}
 
 ~~~
 https://<identity-hostname>/.well-known/agent-identity.json
@@ -204,7 +204,7 @@ A relying party MUST treat a 404 at this URI as "no identity is published
 here", and MUST NOT treat it as evidence that the hostname was never
 allocated: a deleted identity's document is removed before its DNS records
 are, and a tombstoned name may still resolve to the provider for a time
-({{parking}}).
+({{provider-practices}}).
 
 ## Members
 
@@ -367,7 +367,7 @@ deeper checks. Human-facing presentations SHOULD say what was checked
 ("owner controls acme.example") and SHOULD NOT say "verified" or "trusted"
 without an object.
 
-# Provider practices
+# Provider practices {#provider-practices}
 
 A document is only as good as the namespace behind it. A provider that
 serves Agent Identity Documents:
@@ -382,7 +382,7 @@ serves Agent Identity Documents:
    deleted, and changes only the document on suspension. Everything the
    public can read goes through the document; only reachability goes through
    DNS, and DNS removal may be slow.
-4. **Tombstones released names** {#parking} for a cooling period
+4. **Tombstones released names** for a cooling period
    (the reference implementation uses 30 days) during which no new account
    may take the name, while the previous holder may reclaim it at once.
    A leftover record during that period points only at the provider, which
@@ -504,38 +504,42 @@ An active identity with two services and a verified domain:
 
 ~~~
 {
-  "version": "1",
-  "name": "Alice",
-  "status": "active",
-  "fqdn": "alice.knownas.dev",
-  "endpoints": {
-    "web": "https://alice.knownas.dev",
-    "manifest": "https://alice.knownas.dev/.well-known/agent-identity.json",
-    "api": "https://alice.api.knownas.dev",
-    "mcp": "https://alice.mcp.knownas.dev"
-  },
-  "description": "Answers questions about the Acme product catalogue.",
-  "owner": {
-    "verifications": [
-      { "type": "email", "verified_at": "2026-09-21T14:02:11+00:00" },
-      { "type": "domain", "value": "acme.example", "method": "dns-txt",
-        "verifier": "knownas.dev",
-        "verified_at": "2026-10-02T09:00:00+00:00",
-        "expires_at": "2026-11-01T09:00:00+00:00" }
-    ],
-    "standing": { "account_since": "2026-09-21", "status": "active" }
-  },
-  "contact": { "email": "agents@acme.example" },
-  "homepage": "https://acme.example/alice",
-  "metadata": { "framework": "langgraph" }
+ "version": "1",
+ "name": "Ada",
+ "status": "active",
+ "fqdn": "ada.knownas.dev",
+ "endpoints": {
+  "web": "https://ada.knownas.dev",
+  "manifest": "https://ada.knownas.dev/.well-known/agent-identity.json",
+  "api": "https://ada.api.knownas.dev",
+  "mcp": "https://ada.mcp.knownas.dev"
+ },
+ "description": "Answers questions about the Acme product catalogue.",
+ "owner": {
+  "verifications": [
+   { "type": "email", "verified_at": "2026-09-21T14:02:11+00:00" },
+   { "type": "domain", "value": "acme.example", "method": "dns-txt",
+     "verifier": "knownas.dev",
+     "verified_at": "2026-10-02T09:00:00+00:00",
+     "expires_at": "2026-11-01T09:00:00+00:00" }
+  ],
+  "standing": { "account_since": "2026-09-21", "status": "active" }
+ },
+ "contact": { "email": "agents@acme.example" },
+ "homepage": "https://acme.example/ada",
+ "metadata": { "framework": "langgraph" }
 }
 ~~~
 
 The same identity, suspended:
 
 ~~~
-{ "version": "1", "status": "suspended", "fqdn": "alice.knownas.dev" }
+{ "version": "1", "status": "suspended", "fqdn": "ada.knownas.dev" }
 ~~~
+
+The hostnames are the reference implementation's real base domain rather
+than the reserved example domains of RFC 2606, because the document
+describes a practice in production there.
 
 # Acknowledgements
 

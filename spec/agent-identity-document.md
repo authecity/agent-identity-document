@@ -1,6 +1,6 @@
 # The Agent Identity Document: a hosted, accountable public record for AI agents
 
-**Version 1 · 2026-10-03 · Femi Alla, knownAs.dev (Authecity Systems LLC)** · Licensed CC BY 4.0. This is the readable form of `draft-alla-agent-identity-document-00`; the two are kept identical in substance.
+**Version 1 - 2026-10-03 - Femi Alla, knownAs.dev (Authecity Systems LLC)** - Licensed CC BY 4.0. This is the readable form of `draft-alla-agent-identity-document-00`; the two are kept identical in substance.
 
 ## Abstract
 
@@ -134,8 +134,8 @@ base domain and nothing else.
 
 ## Location
 
-The Agent Identity Document is a JSON document [RFC 8259] served over HTTPS at
-the well-known URI [RFC 8615]
+The Agent Identity Document is a JSON document [RFC 8259] served over HTTPS
+[RFC 9110] at the well-known URI [RFC 8615]
 
 ~~~
 https://<identity-hostname>/.well-known/agent-identity.json
@@ -154,7 +154,7 @@ A relying party MUST treat a 404 at this URI as "no identity is published
 here", and MUST NOT treat it as evidence that the hostname was never
 allocated: a deleted identity's document is removed before its DNS records
 are, and a tombstoned name may still resolve to the provider for a time
-(Provider practices, item 4).
+(Provider practices).
 
 ## Members
 
@@ -452,38 +452,42 @@ An active identity with two services and a verified domain:
 
 ~~~
 {
-  "version": "1",
-  "name": "Alice",
-  "status": "active",
-  "fqdn": "alice.knownas.dev",
-  "endpoints": {
-    "web": "https://alice.knownas.dev",
-    "manifest": "https://alice.knownas.dev/.well-known/agent-identity.json",
-    "api": "https://alice.api.knownas.dev",
-    "mcp": "https://alice.mcp.knownas.dev"
-  },
-  "description": "Answers questions about the Acme product catalogue.",
-  "owner": {
-    "verifications": [
-      { "type": "email", "verified_at": "2026-09-21T14:02:11+00:00" },
-      { "type": "domain", "value": "acme.example", "method": "dns-txt",
-        "verifier": "knownas.dev",
-        "verified_at": "2026-10-02T09:00:00+00:00",
-        "expires_at": "2026-11-01T09:00:00+00:00" }
-    ],
-    "standing": { "account_since": "2026-09-21", "status": "active" }
-  },
-  "contact": { "email": "agents@acme.example" },
-  "homepage": "https://acme.example/alice",
-  "metadata": { "framework": "langgraph" }
+ "version": "1",
+ "name": "Ada",
+ "status": "active",
+ "fqdn": "ada.knownas.dev",
+ "endpoints": {
+  "web": "https://ada.knownas.dev",
+  "manifest": "https://ada.knownas.dev/.well-known/agent-identity.json",
+  "api": "https://ada.api.knownas.dev",
+  "mcp": "https://ada.mcp.knownas.dev"
+ },
+ "description": "Answers questions about the Acme product catalogue.",
+ "owner": {
+  "verifications": [
+   { "type": "email", "verified_at": "2026-09-21T14:02:11+00:00" },
+   { "type": "domain", "value": "acme.example", "method": "dns-txt",
+     "verifier": "knownas.dev",
+     "verified_at": "2026-10-02T09:00:00+00:00",
+     "expires_at": "2026-11-01T09:00:00+00:00" }
+  ],
+  "standing": { "account_since": "2026-09-21", "status": "active" }
+ },
+ "contact": { "email": "agents@acme.example" },
+ "homepage": "https://acme.example/ada",
+ "metadata": { "framework": "langgraph" }
 }
 ~~~
 
 The same identity, suspended:
 
 ~~~
-{ "version": "1", "status": "suspended", "fqdn": "alice.knownas.dev" }
+{ "version": "1", "status": "suspended", "fqdn": "ada.knownas.dev" }
 ~~~
+
+The hostnames are the reference implementation's real base domain rather
+than the reserved example domains of RFC 2606, because the document
+describes a practice in production there.
 
 
 ## References

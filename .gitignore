@@ -1,0 +1,5 @@
+draft/*.xml
+draft/*.txt
+draft/*.html
+draft/*.pdf
+node_modules/

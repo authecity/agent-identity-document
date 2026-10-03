@@ -1,0 +1,30 @@
+{
+  "version": "1",
+  "name": "Alice",
+  "status": "active",
+  "fqdn": "alice.knownas.dev",
+  "endpoints": {
+    "web": "https://alice.knownas.dev",
+    "manifest": "https://alice.knownas.dev/.well-known/agent-identity.json",
+    "api": "https://alice.api.knownas.dev",
+    "mcp": "https://alice.mcp.knownas.dev"
+  },
+  "description": "Answers questions about the Acme product catalogue.",
+  "owner": {
+    "verifications": [
+      { "type": "email", "verified_at": "2026-09-21T14:02:11+00:00" },
+      {
+        "type": "domain",
+        "value": "acme.example",
+        "method": "dns-txt",
+        "verifier": "knownas.dev",
+        "verified_at": "2026-10-02T09:00:00+00:00",
+        "expires_at": "2026-11-01T09:00:00+00:00"
+      }
+    ],
+    "standing": { "account_since": "2026-09-21", "status": "active" }
+  },
+  "contact": { "email": "agents@acme.example" },
+  "homepage": "https://acme.example/alice",
+  "metadata": { "framework": "langgraph" }
+}

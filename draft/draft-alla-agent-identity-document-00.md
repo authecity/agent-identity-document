@@ -231,8 +231,11 @@ to set them.
 : Object mapping an endpoint name to an absolute `https` URL. REQUIRED when
   `status` is not `suspended`. The provider MUST include `web` (the identity
   hostname) and `manifest` (this document's URL). It MUST include one member
-  per service hostname the identity owns, named `api`, `mcp` or `webhooks`
-  (note: the member is `webhooks`; its DNS label is `hooks`). Every value MUST
+  per service the identity offers **and that the provider routes to a live
+  origin**, named `api`, `mcp` or `webhooks` (note: the member is
+  `webhooks`; its DNS label is `hooks`). A service hostname that is reserved
+  but not yet routed MUST NOT be listed, so that a relying party can tell
+  "this name is reserved" from "this service answers". Every value MUST
   begin with `https://`.
 
 `owner`:

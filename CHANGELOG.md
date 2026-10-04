@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased (will be draft -01)
+
+- `endpoints` lists a service only while the provider routes it to a live
+  origin; a reserved but unrouted service hostname is not listed. Follows the
+  reference implementation's ADR 0041 (proposed 2026-10-03). The submitted
+  `-00` text says "one member per service hostname the identity owns"; the
+  readable spec and the draft source here already carry the new rule.
+
 ## 2026-10-03
 
 - First public text of version 1, derived from the knownAs.dev reference

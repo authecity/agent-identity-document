@@ -1,7 +1,7 @@
 ---
 title: "The Agent Identity Document: A Hosted, Accountable Public Record for AI Agents"
 abbrev: Agent Identity Document
-docname: draft-alla-agent-identity-document-00
+docname: draft-alla-agent-identity-document-01
 category: info
 submissiontype: IETF
 ipr: trust200902
@@ -544,6 +544,12 @@ The same identity, suspended:
 The hostnames are the reference implementation's real base domain rather
 than the reserved example domains of RFC 2606, because the document
 describes a practice in production there.
+
+# Changes since -00
+
+- `endpoints` lists a service only while the provider routes it to a
+  live origin; a reserved but unrouted service hostname is not listed
+  (previously "one member per service hostname the identity owns").
 
 # Acknowledgements
 

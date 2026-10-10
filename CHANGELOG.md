@@ -1,12 +1,14 @@
 # Changelog
 
-## Unreleased (will be draft -01)
+## 2026-10-XX (draft -01)
 
 - `endpoints` lists a service only while the provider routes it to a live
   origin; a reserved but unrouted service hostname is not listed. Follows the
-  reference implementation's ADR 0041 (proposed 2026-10-03). The submitted
-  `-00` text says "one member per service hostname the identity owns"; the
-  readable spec and the draft source here already carry the new rule.
+  reference implementation's ADR 0041 (live since 2026-10-07). The `-00`
+  text says "one member per service hostname the identity owns".
+- The draft source is renamed `-01` and gains a "Changes since -00"
+  appendix. The README names the `web-bot-auth@ietf.org` list and the IANA
+  registry's GitHub issues.
 
 ## 2026-10-03
 

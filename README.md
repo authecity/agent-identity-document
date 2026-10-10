@@ -62,7 +62,7 @@ Nothing needs installing. The IETF's [Author Tools](https://author-tools.ietf.or
 accept kramdown-rfc Markdown and return XML, text and HTML, and run `idnits`.
 
 1. Open <https://author-tools.ietf.org/>, upload
-   `draft/draft-alla-agent-identity-document-00.md`, and download the
+   `draft/draft-alla-agent-identity-document-01.md`, and download the
    generated **XML (v3)** and **text**. Fix anything `idnits` reports.
 2. Go to <https://datatracker.ietf.org/submit/>, upload the XML, confirm the
    author details, and click the confirmation link that arrives by e-mail.
@@ -74,21 +74,23 @@ accept kramdown-rfc Markdown and return XML, text and HTML, and run `idnits`.
 4. A draft expires after six months but **stays in the archive for ever**,
    with its posting date. Post `-01` with any changes before expiry.
 5. After posting, announce it where the neighbours are: the
-   `webbotauth` list (for the signed-requests relationship) and the authors
+   `web-bot-auth@ietf.org` list (for the signed-requests relationship) and the authors
    of the ANS and ADP drafts, by name, with a one-paragraph note of what
    this adds. Do not post to lists where it is not on topic.
-6. Request the well-known URI registration through IANA's
+6. Request the well-known URI registration for IANA's
    [Well-Known URIs](https://www.iana.org/assignments/well-known-uris/)
-   registry interface, citing the draft. The policy is "Specification
+   registry as an issue at
+   <https://github.com/protocol-registries/well-known-uris>, citing the
+   draft. The policy is "Specification
    Required" with expert review; the entry is **provisional** until a
    standards body adopts the format.
 
 To render locally instead: `gem install kramdown-rfc` and
-`pip install xml2rfc`, then `kdrfc draft/draft-alla-agent-identity-document-00.md`.
+`pip install xml2rfc`, then `kdrfc draft/draft-alla-agent-identity-document-01.md`.
 
 ## Status
 
 Version 1 of the format is in production at knownAs.dev. The draft is
-`-00`, an individual submission with no standing in the IETF process.
+`-01`, an individual submission with no standing in the IETF process.
 Issues and pull requests are welcome; changes that alter the meaning of a
 member need a new `version`.

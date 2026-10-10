@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-10-XX (draft -01)
+## 2026-10-09 (draft -01)
 
 - `endpoints` lists a service only while the provider routes it to a live
   origin; a reserved but unrouted service hostname is not listed. Follows the

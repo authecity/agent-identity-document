@@ -1,0 +1,20 @@
+{
+  "name": "knownas-verify-example-mcp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test server.test.ts",
+    "start": "node server.ts"
+  },
+  "dependencies": {
+    "@knownas/verify": "file:../../typescript",
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "express": "^5.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}

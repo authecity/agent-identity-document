@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-14 (integrations)
+
+- `integrations/`: three worked examples that refuse unverified agents and
+  name the check that failed: a FastAPI dependency
+  (`knownas_identity("owner.domain")`), an Express middleware
+  (`knownasVerify({ require: ["owner.domain"] })`), and a stateless
+  Streamable HTTP MCP server behind that middleware, so an unverified agent
+  never reaches a tool. Each has offline tests; a workflow runs them.
+- `python/`: `knownas_verify.testing` (`sign_request`, `recorded_provider`,
+  `minimal_document`, `TEST_KEY`) for testing code that verifies agents;
+  the interop run uses it. The test-only signer file is gone.
+
 ## 2026-10-14 (verifier library, TypeScript)
 
 - `typescript/`: `@knownas/verify` 0.1.0, the TypeScript and Node twin of

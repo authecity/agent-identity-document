@@ -1,0 +1,48 @@
+name: Integrations
+
+on:
+  pull_request:
+    paths: ["integrations/**", "python/**", "typescript/**", "tests/vectors/**", ".github/workflows/integrations.yml"]
+  push:
+    branches: [main]
+    paths: ["integrations/**", "python/**", "typescript/**", "tests/vectors/**", ".github/workflows/integrations.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  fastapi:
+    name: FastAPI dependency
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations/fastapi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install -r requirements.txt ruff
+      - name: Lint
+        run: ruff check . && ruff format --check .
+      - name: Tests
+        run: pytest -q
+
+  express-and-mcp:
+    name: Express middleware and MCP server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Build the verifier the examples link to
+        working-directory: typescript
+        run: npm ci && npm run build
+      - name: Express
+        working-directory: integrations/express
+        run: npm ci && npm test
+      - name: MCP
+        working-directory: integrations/mcp
+        run: npm ci && npm test

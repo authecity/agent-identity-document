@@ -1,0 +1,9 @@
+{
+  "name": "knownas-verify-interop",
+  "private": true,
+  "type": "module",
+  "description": "Interop run of knownas-verify against Cloudflare's open-source web-bot-auth verifier; see README.md",
+  "dependencies": {
+    "web-bot-auth": "0.2.0"
+  }
+}

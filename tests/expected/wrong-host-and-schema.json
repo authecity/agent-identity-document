@@ -15,7 +15,7 @@
       {
         "name": "document.schema",
         "outcome": "invalid",
-        "detail": "document: {'version': '1', 'name': 'Carol', 'status': 'active', 'fqdn': 'alice.knownas.dev', 'endpoints': {'web': 'https://carol.k"
+        "detail": "does not match agent-identity-document.schema.json v1.0.1-draft"
       },
       {
         "name": "document.host",

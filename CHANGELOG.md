@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-14 (verifier library, TypeScript)
+
+- `typescript/`: `@knownas/verify` 0.1.0, the TypeScript and Node twin of
+  `knownas-verify`: `verifyIdentity`, `verifyRequest`, `require`,
+  `assertVerified`, `summarise`, the same fetch limits, the same Structured
+  Fields subset, Ed25519 through WebCrypto, the schema bundled at
+  `v1.0.1-draft`. Its suite reproduces every file in `tests/expected` byte
+  for byte and verifies the draft's E.2 vectors with byte-identical
+  signature bases. One dependency, `ajv`.
+- `python/`: the `document.schema` detail no longer quotes the validator's
+  message (validators word them differently); it names the schema and tag.
+  `tests/expected` regenerated for that one line.
+- A workflow runs the TypeScript package on Node 22 and 24.
+
 ## 2026-10-14 (verifier library, signed requests)
 
 - `python/`: `verify_request(request)` verifies one Web Bot Auth signature

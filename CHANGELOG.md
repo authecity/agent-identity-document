@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-14 (verifier library, signed requests)
+
+- `python/`: `verify_request(request)` verifies one Web Bot Auth signature
+  (RFC 9421 under `draft-ietf-webbotauth-httpsig-protocol-00`, the revision
+  the reference implementation pins) and then reads the signer's identity.
+  Key lookup by the (URL, key) pair from the directory of the covered
+  `Signature-Agent` member; required `created`, `expires`, `keyid` and
+  `tag`; `kid` recomputed as the JWK thumbprint; discovery failure is
+  `unverified`; published test keys refused unless testing; Ed25519 only.
+  A strict Structured Fields subset (`sf.py`) replaces a dependency;
+  `cryptography` is added for Ed25519.
+- `tests/vectors/web-bot-auth-httpsig-00.json`: the draft's Appendix E.2
+  vectors as shared test data (signature bases match byte for byte).
+
 ## 2026-10-14 (verifier library, lookup)
 
 - `python/`: `knownas-verify` 0.1.0, the verifier library's lookup half.

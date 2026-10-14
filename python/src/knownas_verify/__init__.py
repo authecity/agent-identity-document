@@ -35,6 +35,7 @@ from .result import (
     assert_verified,
     require,
 )
+from .signatures import Request, verify_request
 from .words import summarise
 
 __all__ = [
@@ -46,6 +47,7 @@ __all__ = [
     "UNREACHABLE",
     "Check",
     "Outcome",
+    "Request",
     "Verification",
     "VerificationFailed",
     "__version__",
@@ -53,4 +55,5 @@ __all__ = [
     "require",
     "summarise",
     "verify_identity",
+    "verify_request",
 ]

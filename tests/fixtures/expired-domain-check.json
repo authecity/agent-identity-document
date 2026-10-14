@@ -1,0 +1,54 @@
+{
+  "description": "An active identity whose domain check expired before the verifier looked: the check is reported invalid with the expiry date, by the verifier's clock.",
+  "subject": "alice.knownas.dev",
+  "now": "2026-10-14T12:00:00Z",
+  "responses": {
+    "https://alice.knownas.dev/.well-known/agent-identity.json": {
+      "status": 200,
+      "headers": { "content-type": "application/json", "access-control-allow-origin": "*" },
+      "body": {
+        "version": "1",
+        "name": "Alice",
+        "status": "active",
+        "fqdn": "alice.knownas.dev",
+        "endpoints": {
+          "web": "https://alice.knownas.dev",
+          "manifest": "https://alice.knownas.dev/.well-known/agent-identity.json"
+        },
+        "owner": {
+          "verifications": [
+            { "type": "email", "verified_at": "2026-08-01T10:00:00+00:00" },
+            {
+              "type": "domain",
+              "value": "acme.example",
+              "method": "dns-txt",
+              "verifier": "knownas.dev",
+              "verified_at": "2026-09-01T09:00:00+00:00",
+              "expires_at": "2026-10-01T09:00:00+00:00"
+            }
+          ],
+          "standing": { "account_since": "2026-08-01", "status": "active" }
+        }
+      }
+    },
+    "https://alice.knownas.dev/.well-known/http-message-signatures-directory": {
+      "status": 200,
+      "headers": { "content-type": "application/http-message-signatures-directory+json" },
+      "body": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
+            "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+          }
+        ]
+      }
+    },
+    "https://alice.knownas.dev/.well-known/agent-identity-statement.jws": {
+      "status": 404,
+      "headers": { "content-type": "application/json" },
+      "body": { "error": "not_found" }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "verification": {
+    "subject": "alice.knownas.dev",
+    "provider": "knownas.dev",
+    "status": "unreachable",
+    "status_source": "none",
+    "observed_at": "2026-10-14T12:00:00Z",
+    "checks": [
+      {
+        "name": "document.fetched",
+        "outcome": "unverified",
+        "detail": "no answer within 5s",
+        "source": "https://alice.knownas.dev/.well-known/agent-identity.json"
+      },
+      {
+        "name": "keys.directory",
+        "outcome": "unverified",
+        "detail": "discovery failed: connection refused",
+        "source": "https://alice.knownas.dev/.well-known/http-message-signatures-directory"
+      },
+      {
+        "name": "platform.statement",
+        "outcome": "unverified",
+        "detail": "not fetched: connection refused",
+        "source": "https://alice.knownas.dev/.well-known/agent-identity-statement.jws"
+      }
+    ]
+  },
+  "summary": [
+    "alice.knownas.dev could not be read (no answer within 5s)."
+  ]
+}

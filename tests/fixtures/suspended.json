@@ -1,0 +1,30 @@
+{
+  "description": "A suspended identity: the minimal document, an empty key set, no statement. Status comes from the document; the empty key set alone would not say suspended.",
+  "subject": "alice.knownas.dev",
+  "now": "2026-10-14T12:00:00Z",
+  "responses": {
+    "https://alice.knownas.dev/.well-known/agent-identity.json": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "cache-control": "public, max-age=60",
+        "x-content-type-options": "nosniff",
+        "access-control-allow-origin": "*"
+      },
+      "body": { "version": "1", "status": "suspended", "fqdn": "alice.knownas.dev" }
+    },
+    "https://alice.knownas.dev/.well-known/http-message-signatures-directory": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/http-message-signatures-directory+json",
+        "cache-control": "public, max-age=300"
+      },
+      "body": { "keys": [] }
+    },
+    "https://alice.knownas.dev/.well-known/agent-identity-statement.jws": {
+      "status": 404,
+      "headers": { "content-type": "application/json" },
+      "body": { "error": "not_found" }
+    }
+  }
+}

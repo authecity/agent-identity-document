@@ -1,0 +1,26 @@
+{
+  "description": "No identity is published at this name: the provider answers 404 with the headers the specification requires. Status is unknown, never suspended.",
+  "subject": "nobody.knownas.dev",
+  "now": "2026-10-14T12:00:00Z",
+  "responses": {
+    "https://nobody.knownas.dev/.well-known/agent-identity.json": {
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "x-content-type-options": "nosniff",
+        "access-control-allow-origin": "*"
+      },
+      "body": { "error": "not_found" }
+    },
+    "https://nobody.knownas.dev/.well-known/http-message-signatures-directory": {
+      "status": 404,
+      "headers": { "content-type": "application/json" },
+      "body": { "error": "not_found" }
+    },
+    "https://nobody.knownas.dev/.well-known/agent-identity-statement.jws": {
+      "status": 404,
+      "headers": { "content-type": "application/json" },
+      "body": { "error": "not_found" }
+    }
+  }
+}

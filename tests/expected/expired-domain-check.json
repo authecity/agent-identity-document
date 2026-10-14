@@ -1,0 +1,63 @@
+{
+  "verification": {
+    "subject": "alice.knownas.dev",
+    "provider": "knownas.dev",
+    "status": "active",
+    "status_source": "document",
+    "observed_at": "2026-10-14T12:00:00Z",
+    "checks": [
+      {
+        "name": "document.fetched",
+        "outcome": "verified",
+        "detail": "HTTPS, 200, application/json, 509 B",
+        "source": "https://alice.knownas.dev/.well-known/agent-identity.json"
+      },
+      {
+        "name": "document.schema",
+        "outcome": "verified",
+        "detail": "agent-identity-document.schema.json v1.0.1-draft"
+      },
+      {
+        "name": "document.host",
+        "outcome": "verified",
+        "detail": "fqdn is alice.knownas.dev"
+      },
+      {
+        "name": "owner.email",
+        "outcome": "verified",
+        "verified_at": "2026-08-01T10:00:00+00:00"
+      },
+      {
+        "name": "owner.domain",
+        "outcome": "invalid",
+        "detail": "controls acme.example, dns-txt, by knownas.dev; expired 2026-10-01T09:00:00+00:00",
+        "verified_at": "2026-09-01T09:00:00+00:00",
+        "expires_at": "2026-10-01T09:00:00+00:00"
+      },
+      {
+        "name": "owner.standing",
+        "outcome": "verified",
+        "detail": "account since 2026-08-01, active"
+      },
+      {
+        "name": "keys.directory",
+        "outcome": "verified",
+        "detail": "1 active key",
+        "source": "https://alice.knownas.dev/.well-known/http-message-signatures-directory"
+      },
+      {
+        "name": "platform.statement",
+        "outcome": "absent",
+        "detail": "no signed statement is served for this document yet",
+        "source": "https://alice.knownas.dev/.well-known/agent-identity-statement.jws"
+      }
+    ]
+  },
+  "summary": [
+    "alice.knownas.dev is active, as published by knownas.dev.",
+    "Owner's email address was checked 2026-08-01.",
+    "Owner controls acme.example, checked 2026-09-01, expired 2026-10-01.",
+    "Account since 2026-08-01, active.",
+    "1 active key published."
+  ]
+}

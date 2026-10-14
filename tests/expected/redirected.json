@@ -1,0 +1,33 @@
+{
+  "verification": {
+    "subject": "dave.knownas.dev",
+    "provider": "knownas.dev",
+    "status": "unreachable",
+    "status_source": "none",
+    "observed_at": "2026-10-14T12:00:00Z",
+    "checks": [
+      {
+        "name": "document.fetched",
+        "outcome": "unverified",
+        "detail": "301 to https://example.org/; redirects are not followed",
+        "source": "https://dave.knownas.dev/.well-known/agent-identity.json"
+      },
+      {
+        "name": "keys.directory",
+        "outcome": "verified",
+        "detail": "1 active key",
+        "source": "https://dave.knownas.dev/.well-known/http-message-signatures-directory"
+      },
+      {
+        "name": "platform.statement",
+        "outcome": "absent",
+        "detail": "no signed statement is served for this document yet",
+        "source": "https://dave.knownas.dev/.well-known/agent-identity-statement.jws"
+      }
+    ]
+  },
+  "summary": [
+    "dave.knownas.dev could not be read (301 to https://example.org/; redirects are not followed).",
+    "1 active key published."
+  ]
+}

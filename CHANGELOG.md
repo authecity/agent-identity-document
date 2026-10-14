@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-14 (verifier library, lookup)
+
+- `python/`: `knownas-verify` 0.1.0, the verifier library's lookup half.
+  `verify_identity(hostname)` reads the document, validates it against the
+  schema at `v1.0.1-draft`, reports each owner check with its dates, reads
+  the Web Bot Auth key directory, and reports the provider's signed statement
+  as absent until providers serve one. Four outcomes per check (`verified`,
+  `invalid`, `unverified`, `absent`); `status` is the document's own, or
+  `unknown` (a 404) or `unreachable`. No trust flag. `require()` and
+  `summarise()` as the reference implementation's ADR 0049 describes.
+  Fetches are HTTPS only, bounded, follow no redirects and refuse non-public
+  addresses. `verify_request` (signed requests) follows in the next release.
+- `tests/fixtures` and `tests/expected`: eight recorded cases every
+  implementation must reproduce.
+- A GitHub Actions workflow runs the package's lint, type check and tests on
+  Python 3.11 to 3.13.
+
 ## 2026-10-09 (draft -01)
 
 - `endpoints` lists a service only while the provider routes it to a live

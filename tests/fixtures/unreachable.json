@@ -1,0 +1,16 @@
+{
+  "description": "Nothing readable comes back: a timeout on the document, a network error on the directory. Status is unreachable, which is not a statement by the provider.",
+  "subject": "alice.knownas.dev",
+  "now": "2026-10-14T12:00:00Z",
+  "responses": {
+    "https://alice.knownas.dev/.well-known/agent-identity.json": {
+      "error": { "kind": "timeout", "detail": "no answer within 5s" }
+    },
+    "https://alice.knownas.dev/.well-known/http-message-signatures-directory": {
+      "error": { "kind": "network", "detail": "connection refused" }
+    },
+    "https://alice.knownas.dev/.well-known/agent-identity-statement.jws": {
+      "error": { "kind": "network", "detail": "connection refused" }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "verification": {
+    "subject": "nobody.knownas.dev",
+    "provider": "knownas.dev",
+    "status": "unknown",
+    "status_source": "document",
+    "observed_at": "2026-10-14T12:00:00Z",
+    "checks": [
+      {
+        "name": "document.fetched",
+        "outcome": "verified",
+        "detail": "404: no identity is published at this name",
+        "source": "https://nobody.knownas.dev/.well-known/agent-identity.json"
+      },
+      {
+        "name": "keys.directory",
+        "outcome": "unverified",
+        "detail": "discovery failed: HTTP 404",
+        "source": "https://nobody.knownas.dev/.well-known/http-message-signatures-directory"
+      },
+      {
+        "name": "platform.statement",
+        "outcome": "absent",
+        "detail": "no signed statement is served for this document yet",
+        "source": "https://nobody.knownas.dev/.well-known/agent-identity-statement.jws"
+      }
+    ]
+  },
+  "summary": [
+    "No identity is published at nobody.knownas.dev."
+  ]
+}

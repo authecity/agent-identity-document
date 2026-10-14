@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knownas-verify"
+version = "0.1.0"
+description = "Verify an AI agent's public identity from its Agent Identity Document: an itemised result, never a trust flag."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+authors = [{ name = "Authecity Systems LLC", email = "ops@knownas.dev" }]
+keywords = ["ai agents", "identity", "verification", "web bot auth", "knownas"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Security",
+  "Typing :: Typed",
+]
+dependencies = [
+  "jsonschema>=4.20",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
+  "mypy>=1.10",
+]
+
+[project.urls]
+Homepage = "https://github.com/authecity/agent-identity-document"
+Specification = "https://github.com/authecity/agent-identity-document/blob/main/spec/agent-identity-document.md"
+Issues = "https://github.com/authecity/agent-identity-document/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+knownas_verify = ["py.typed", "schema/*.json"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "S", "ANN", "RUF"]
+ignore = ["ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "ANN"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+mypy_path = "src"
+packages = ["knownas_verify"]
+
+[[tool.mypy.overrides]]
+module = ["jsonschema", "jsonschema.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q --strict-markers"
+markers = ["live: fetches a real identity on the knownAs.dev dev environment"]

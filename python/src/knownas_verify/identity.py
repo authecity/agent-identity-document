@@ -330,48 +330,68 @@ def _parse_time(value: str) -> datetime | None:
 
 
 def _directory_check(fetch: Fetcher, url: str, timeout: float) -> Check:
+    check, _ = read_directory(fetch, url, timeout)
+    return check
+
+
+def read_directory(fetch: Fetcher, url: str, timeout: float) -> tuple[Check, list[dict[str, Any]]]:
+    """Fetch and validate a key directory. The keys are returned only when the
+    check is ``verified``; otherwise the list is empty and the check says why.
+    A 404 or a failed fetch is a discovery failure, ``unverified``: it is not
+    evidence about any key a verifier already holds (draft section 6.10)."""
     try:
         response = fetch.get(
             url, accept=DIRECTORY_MEDIA_TYPE, max_bytes=MAX_DIRECTORY_BYTES, timeout=timeout
         )
     except FetchError as error:
-        return Check(
-            "keys.directory", "unverified", f"discovery failed: {error.detail}", source=url
+        return (
+            Check("keys.directory", "unverified", f"discovery failed: {error.detail}", source=url),
+            [],
         )
     if response.status != 200:
-        # Not evidence (draft section 6.10): a directory that fails to resolve
-        # says nothing about the keys a verifier already holds.
-        return Check(
-            "keys.directory", "unverified", f"discovery failed: HTTP {response.status}", source=url
+        return (
+            Check(
+                "keys.directory",
+                "unverified",
+                f"discovery failed: HTTP {response.status}",
+                source=url,
+            ),
+            [],
         )
     if _content_type(response) != DIRECTORY_MEDIA_TYPE:
-        return Check(
-            "keys.directory",
-            "invalid",
-            f"served as {_content_type(response)}, not {DIRECTORY_MEDIA_TYPE}",
-            source=url,
+        return (
+            Check(
+                "keys.directory",
+                "invalid",
+                f"served as {_content_type(response)}, not {DIRECTORY_MEDIA_TYPE}",
+                source=url,
+            ),
+            [],
         )
     try:
         parsed = json.loads(response.body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        return Check("keys.directory", "invalid", f"not JSON: {error}", source=url)
+        return Check("keys.directory", "invalid", f"not JSON: {error}", source=url), []
     keys = parsed.get("keys") if isinstance(parsed, dict) else None
     if not isinstance(keys, list):
-        return Check("keys.directory", "invalid", "no keys array", source=url)
+        return Check("keys.directory", "invalid", "no keys array", source=url), []
     if len(keys) > MAX_DIRECTORY_KEYS:
-        return Check(
-            "keys.directory",
-            "invalid",
-            f"{len(keys)} keys; at most {MAX_DIRECTORY_KEYS} are read",
-            source=url,
+        return (
+            Check(
+                "keys.directory",
+                "invalid",
+                f"{len(keys)} keys; at most {MAX_DIRECTORY_KEYS} are read",
+                source=url,
+            ),
+            [],
         )
     for key in keys:
         problem = _key_problem(key)
         if problem:
-            return Check("keys.directory", "invalid", problem, source=url)
+            return Check("keys.directory", "invalid", problem, source=url), []
     count = len(keys)
     detail = "no active keys" if count == 0 else f"{count} active key{'s' if count != 1 else ''}"
-    return Check("keys.directory", "verified", detail, source=url)
+    return Check("keys.directory", "verified", detail, source=url), list(keys)
 
 
 def _key_problem(key: Any) -> str | None:

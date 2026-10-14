@@ -44,6 +44,38 @@ All of it public, all served by the identity's own host over HTTPS:
 It never reads a status file or badge that summarises the document, never
 reads the A2A agent card, and never connects to the agent's endpoints.
 
+## Signed requests
+
+`verify_request` checks an HTTP request signed under Web Bot Auth (HTTP
+Message Signatures, RFC 9421, as profiled by
+`draft-ietf-webbotauth-httpsig-protocol-00`), then reads the signer's
+identity as above:
+
+```python
+from knownas_verify import Request, verify_request, require
+
+request = Request.from_mapping(
+    method="GET",
+    url="https://api.example/orders",          # the target URI you served
+    headers={"Signature-Agent": ..., "Signature-Input": ..., "Signature": ...},
+)
+v = verify_request(request)
+
+v.check("request.agent")       # which Signature-Agent member the signature covers
+v.check("request.signature")   # verified | invalid | unverified, with the label, key and covered components
+require(v, "request.signature", "owner.domain")
+```
+
+What it makes binding: the key is looked up by the **(URL, key) pair**, from
+the directory of the `Signature-Agent` member the signature covers, never by
+key alone; `created`, `expires`, `keyid` and `tag="web-bot-auth"` are
+required and `expires` is enforced by your clock; the directory's `kid` must
+be the key's own thumbprint; a discovery failure is `unverified`, never
+`invalid`; published test keys are refused unless you pass
+`allow_test_keys=True` in a test. Only Ed25519 keys are read. The signature
+base is built per RFC 9421 section 2.5 and matches the draft's Appendix E.2
+vectors byte for byte (`../tests/vectors`).
+
 ## Outcomes
 
 Each check has one of four outcomes:
@@ -75,7 +107,7 @@ revocation.
 pip install knownas-verify
 ```
 
-Python 3.11 or later. One dependency, `jsonschema`.
+Python 3.11 or later. Two dependencies: `jsonschema` and `cryptography`.
 
 ## Tests
 

@@ -17,3 +17,4 @@ interop/*.json
 !interop/package-lock.json
 typescript/node_modules/
 typescript/dist/
+integrations/*/node_modules/

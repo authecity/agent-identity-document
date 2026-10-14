@@ -1,0 +1,7 @@
+extend = "../../python/pyproject.toml"
+
+[lint]
+extend-ignore = ["B008"]  # Depends() in a default is the FastAPI idiom
+
+[lint.per-file-ignores]
+"test_app.py" = ["S101", "ANN", "E501"]

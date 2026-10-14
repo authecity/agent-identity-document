@@ -6,8 +6,7 @@ test key, or verify a request another signer produced, with
     python knownas.py sign [--legacy] [--no-alg] > out.json
     python knownas.py verify < in.json
 
-Run from this directory with the package's venv (``../python/.venv``) and
-``PYTHONPATH=../python/tests`` so the test-only signer is importable.
+Run from this directory with the package's venv (``../python/.venv``).
 """
 
 from __future__ import annotations
@@ -22,7 +21,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from knownas_verify import Request, verify_request
 from knownas_verify.fetch import RecordedFetcher, Response
-from signer import sign_request
+from knownas_verify.testing import sign_request
 
 HERE = Path(__file__).resolve().parent
 VECTORS = json.loads(

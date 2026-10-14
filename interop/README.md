@@ -14,7 +14,6 @@ working-group document replaced.
 cd interop
 npm ci                                   # web-bot-auth 0.2.0 and its three dependencies
 python -m venv ../python/.venv && ../python/.venv/Scripts/pip install -e "../python[dev]"
-export PYTHONPATH=../python/tests        # the test-only signer
 
 node cloudflare.mjs vectors              # 1. Cloudflare verifies the draft's E.2 vectors
 python knownas.py sign | node cloudflare.mjs verify            # 2. knownAs signs, Cloudflare verifies
@@ -26,8 +25,8 @@ node cloudflare.mjs sign https://api.example/o https://signature-agent.test --le
 
 `knownas-verify`'s own run over the vectors is `python/tests/test_signatures.py`
 (signature bases byte for byte, then both signatures). The signer on the
-knownAs side is `python/tests/signer.py`, test-only; the platform's SDK will
-sign under its ADR 0039 increment 2.
+knownAs side is `knownas_verify.testing.sign_request`, for tests; the
+platform's SDK will sign under its ADR 0039 increment 2.
 
 ## Result, 2026-10-14
 

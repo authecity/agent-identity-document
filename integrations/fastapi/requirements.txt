@@ -1,0 +1,5 @@
+# The example needs the verifier and FastAPI; the test client needs httpx.
+knownas-verify @ file:../../python
+fastapi>=0.115
+httpx>=0.27
+pytest>=8

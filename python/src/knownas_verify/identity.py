@@ -249,9 +249,14 @@ def _schema_check(document: Mapping[str, Any]) -> Check:
         return Check(
             "document.schema", "verified", f"agent-identity-document.schema.json {SCHEMA_TAG}"
         )
-    first = errors[0]
-    where = "/".join(str(p) for p in first.absolute_path) or "document"
-    return Check("document.schema", "invalid", f"{where}: {first.message[:120]}")
+    # The detail names the schema, not the validator's message: the two
+    # implementations must produce the same result, and validators word their
+    # messages differently.
+    return Check(
+        "document.schema",
+        "invalid",
+        f"does not match agent-identity-document.schema.json {SCHEMA_TAG}",
+    )
 
 
 def _host_check(document: Mapping[str, Any], host: str) -> Check:

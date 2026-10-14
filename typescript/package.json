@@ -1,0 +1,37 @@
+{
+  "name": "@knownas/verify",
+  "version": "0.1.0",
+  "description": "Verify an AI agent's public identity from its Agent Identity Document: an itemised result, never a trust flag.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "schema", "README.md"],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test \"tests/*.test.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/authecity/agent-identity-document.git",
+    "directory": "typescript"
+  },
+  "keywords": ["ai agents", "identity", "verification", "web bot auth", "knownas"],
+  "dependencies": {
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -31,6 +31,7 @@ cards, Web Bot Auth, the Agent Name Service).
 | [`schema/agent-identity-document.schema.json`](schema/agent-identity-document.schema.json) | JSON Schema (2020-12) for version 1 | Apache-2.0 |
 | [`examples/`](examples/) | Valid documents: active, suspended | Apache-2.0 |
 | [`python/`](python/) | `knownas-verify`, the verifier library for Python: reads an identity's public record and reports each check, never a trust flag | Apache-2.0 |
+| [`typescript/`](typescript/) | `@knownas/verify`, the same library for TypeScript and Node: one contract, the same fixtures and expected results | Apache-2.0 |
 | [`tests/`](tests/) | Recorded fixtures and the expected result for each, shared by every implementation of the verifier | Apache-2.0 |
 
 Prose is licensed under [CC BY 4.0](LICENSE-CC-BY-4.0.txt). Schemas,

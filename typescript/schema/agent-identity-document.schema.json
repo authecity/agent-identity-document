@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://knownas.dev/schemas/agent-identity-document/1.json",
+  "title": "Agent Identity Document, version 1",
+  "description": "The JSON document an identity provider serves at https://<identity-hostname>/.well-known/agent-identity.json (legacy path: /.well-known/agent.json). Derived from the knownAs.dev reference implementation. A suspended identity publishes only version, status and fqdn.",
+  "oneOf": [
+    { "$ref": "#/$defs/suspended" },
+    { "$ref": "#/$defs/published" }
+  ],
+  "$defs": {
+    "hostname": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$",
+      "maxLength": 253
+    },
+    "httpsUrl": {
+      "type": "string",
+      "pattern": "^https://.+",
+      "maxLength": 2048
+    },
+    "text": {
+      "type": "string",
+      "pattern": "^[^\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f]*$"
+    },
+    "suspended": {
+      "type": "object",
+      "properties": {
+        "version": { "const": "1" },
+        "status": { "const": "suspended" },
+        "fqdn": { "$ref": "#/$defs/hostname" }
+      },
+      "required": ["version", "status", "fqdn"],
+      "additionalProperties": false
+    },
+    "published": {
+      "type": "object",
+      "properties": {
+        "version": { "const": "1" },
+        "name": { "allOf": [{ "$ref": "#/$defs/text" }], "minLength": 1, "maxLength": 120 },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "provisioning", "active", "failed", "archived", "deleting"],
+          "description": "Lifecycle, never liveness. 'suspended' uses the suspended form. A deleted identity has no document."
+        },
+        "fqdn": { "$ref": "#/$defs/hostname" },
+        "endpoints": {
+          "type": "object",
+          "properties": {
+            "web": { "$ref": "#/$defs/httpsUrl" },
+            "manifest": { "$ref": "#/$defs/httpsUrl" },
+            "api": { "$ref": "#/$defs/httpsUrl" },
+            "mcp": { "$ref": "#/$defs/httpsUrl" },
+            "webhooks": { "$ref": "#/$defs/httpsUrl" },
+            "agent_card": { "$ref": "#/$defs/httpsUrl" }
+          },
+          "required": ["web", "manifest"],
+          "additionalProperties": false
+        },
+        "description": { "allOf": [{ "$ref": "#/$defs/text" }], "maxLength": 500 },
+        "owner": { "$ref": "#/$defs/owner" },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string", "format": "email", "maxLength": 254 }
+          },
+          "required": ["email"],
+          "additionalProperties": false
+        },
+        "homepage": { "$ref": "#/$defs/httpsUrl" },
+        "public_key": { "allOf": [{ "$ref": "#/$defs/text" }], "maxLength": 4096 },
+        "metadata": {
+          "type": "object",
+          "maxProperties": 20,
+          "propertyNames": { "pattern": "^[a-z0-9][a-z0-9_.-]*$", "maxLength": 40 },
+          "additionalProperties": { "allOf": [{ "$ref": "#/$defs/text" }], "maxLength": 200 }
+        }
+      },
+      "required": ["version", "name", "status", "fqdn", "endpoints"],
+      "additionalProperties": false
+    },
+    "owner": {
+      "type": "object",
+      "description": "The provider's itemised, dated, expiring checks on the account holder, and the account's standing. Absent when suspended or not in good standing.",
+      "properties": {
+        "verifications": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/check" }
+        },
+        "standing": {
+          "type": "object",
+          "properties": {
+            "account_since": { "type": "string", "format": "date" },
+            "status": { "const": "active" }
+          },
+          "required": ["account_since", "status"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["verifications", "standing"],
+      "additionalProperties": false
+    },
+    "check": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "description": "'email' or 'domain' in version 1; unknown types are ignored by relying parties." },
+        "verified_at": { "type": "string", "format": "date-time" },
+        "value": { "type": "string", "description": "What was checked, where public (a domain). Never an e-mail address." },
+        "method": { "type": "string" },
+        "verifier": { "type": "string" },
+        "expires_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "verified_at"],
+      "additionalProperties": false
+    }
+  }
+}

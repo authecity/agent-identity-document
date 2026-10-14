@@ -1,0 +1,53 @@
+name: Interop with Cloudflare's verifier
+
+on:
+  pull_request:
+    paths: ["interop/**", "python/**", "tests/vectors/**", ".github/workflows/interop.yml"]
+  push:
+    branches: [main]
+    paths: ["interop/**", "python/**", "tests/vectors/**", ".github/workflows/interop.yml"]
+  schedule:
+    - cron: "0 6 * * 1" # Mondays: web-bot-auth moves; this tells us when it moves against us
+
+permissions:
+  contents: read
+
+jobs:
+  interop:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: interop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install both verifiers
+        run: |
+          npm ci
+          python -m pip install -e "../python[dev]"
+      - name: Cloudflare verifies the draft's vectors
+        run: node cloudflare.mjs vectors | tee vectors.out && ! grep -q '"cloudflare":{"outcome":"rejected"' <(head -2 vectors.out)
+      - name: knownAs signs, Cloudflare verifies (dictionary and legacy forms)
+        env:
+          PYTHONPATH: ../python/tests
+        run: |
+          python knownas.py sign | node cloudflare.mjs verify | tee a.out && grep -q '"outcome":"verified"' a.out
+          python knownas.py sign --legacy | node cloudflare.mjs verify | tee b.out && grep -q '"outcome":"verified"' b.out
+      - name: Cloudflare signs, knownAs verifies (dictionary and legacy forms)
+        env:
+          PYTHONPATH: ../python/tests
+        run: |
+          node cloudflare.mjs sign | python knownas.py verify | tee c.out && grep -q '"outcome": "verified"' c.out
+          node cloudflare.mjs sign https://api.example/o https://signature-agent.test --legacy | python knownas.py verify | tee d.out && grep -q '"outcome": "verified"' d.out
+      - name: The known divergence still holds (no alg is rejected by Cloudflare, accepted by knownAs)
+        env:
+          PYTHONPATH: ../python/tests
+        run: |
+          python knownas.py sign --no-alg > e.json
+          node cloudflare.mjs verify < e.json | tee e.out && grep -q 'alg is absent' e.out
+          python knownas.py verify < e.json | tee f.out && grep -q '"outcome": "verified"' f.out

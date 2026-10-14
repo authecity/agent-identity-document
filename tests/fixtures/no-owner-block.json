@@ -1,0 +1,31 @@
+{
+  "description": "An active identity whose provider publishes no owner block: the standing is reported absent, not invalid, and the identity is still active.",
+  "subject": "bob.knownas.dev",
+  "now": "2026-10-14T12:00:00Z",
+  "responses": {
+    "https://bob.knownas.dev/.well-known/agent-identity.json": {
+      "status": 200,
+      "headers": { "content-type": "application/json", "access-control-allow-origin": "*" },
+      "body": {
+        "version": "1",
+        "name": "Bob",
+        "status": "active",
+        "fqdn": "bob.knownas.dev",
+        "endpoints": {
+          "web": "https://bob.knownas.dev",
+          "manifest": "https://bob.knownas.dev/.well-known/agent-identity.json"
+        }
+      }
+    },
+    "https://bob.knownas.dev/.well-known/http-message-signatures-directory": {
+      "status": 200,
+      "headers": { "content-type": "application/http-message-signatures-directory+json" },
+      "body": { "keys": [] }
+    },
+    "https://bob.knownas.dev/.well-known/agent-identity-statement.jws": {
+      "status": 404,
+      "headers": { "content-type": "application/json" },
+      "body": { "error": "not_found" }
+    }
+  }
+}

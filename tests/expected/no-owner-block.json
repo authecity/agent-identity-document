@@ -1,0 +1,48 @@
+{
+  "verification": {
+    "subject": "bob.knownas.dev",
+    "provider": "knownas.dev",
+    "status": "active",
+    "status_source": "document",
+    "observed_at": "2026-10-14T12:00:00Z",
+    "checks": [
+      {
+        "name": "document.fetched",
+        "outcome": "verified",
+        "detail": "HTTPS, 200, application/json, 186 B",
+        "source": "https://bob.knownas.dev/.well-known/agent-identity.json"
+      },
+      {
+        "name": "document.schema",
+        "outcome": "verified",
+        "detail": "agent-identity-document.schema.json v1.0.1-draft"
+      },
+      {
+        "name": "document.host",
+        "outcome": "verified",
+        "detail": "fqdn is bob.knownas.dev"
+      },
+      {
+        "name": "owner.standing",
+        "outcome": "absent",
+        "detail": "the document carries no owner block"
+      },
+      {
+        "name": "keys.directory",
+        "outcome": "verified",
+        "detail": "no active keys",
+        "source": "https://bob.knownas.dev/.well-known/http-message-signatures-directory"
+      },
+      {
+        "name": "platform.statement",
+        "outcome": "absent",
+        "detail": "no signed statement is served for this document yet",
+        "source": "https://bob.knownas.dev/.well-known/agent-identity-statement.jws"
+      }
+    ]
+  },
+  "summary": [
+    "bob.knownas.dev is active, as published by knownas.dev.",
+    "No active signing keys."
+  ]
+}

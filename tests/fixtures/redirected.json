@@ -1,0 +1,29 @@
+{
+  "description": "The document URL redirects. Redirects are not followed, so the document is unverified and status unreachable; the directory still reads.",
+  "subject": "dave.knownas.dev",
+  "now": "2026-10-14T12:00:00Z",
+  "responses": {
+    "https://dave.knownas.dev/.well-known/agent-identity.json": {
+      "error": { "kind": "redirect", "detail": "301 to https://example.org/; redirects are not followed" }
+    },
+    "https://dave.knownas.dev/.well-known/http-message-signatures-directory": {
+      "status": 200,
+      "headers": { "content-type": "application/http-message-signatures-directory+json" },
+      "body": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
+            "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+          }
+        ]
+      }
+    },
+    "https://dave.knownas.dev/.well-known/agent-identity-statement.jws": {
+      "status": 404,
+      "headers": { "content-type": "application/json" },
+      "body": { "error": "not_found" }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "description": "A document that names another host and adds a member the schema does not allow: both are reported invalid, and the published status is still read.",
+  "subject": "carol.knownas.dev",
+  "now": "2026-10-14T12:00:00Z",
+  "responses": {
+    "https://carol.knownas.dev/.well-known/agent-identity.json": {
+      "status": 200,
+      "headers": { "content-type": "application/json" },
+      "body": {
+        "version": "1",
+        "name": "Carol",
+        "status": "active",
+        "fqdn": "alice.knownas.dev",
+        "endpoints": {
+          "web": "https://carol.knownas.dev",
+          "manifest": "https://carol.knownas.dev/.well-known/agent-identity.json"
+        },
+        "trusted": true,
+        "owner": {
+          "verifications": [],
+          "standing": { "account_since": "2026-10-01", "status": "active" }
+        }
+      }
+    },
+    "https://carol.knownas.dev/.well-known/http-message-signatures-directory": {
+      "status": 200,
+      "headers": { "content-type": "application/json" },
+      "body": { "keys": [] }
+    },
+    "https://carol.knownas.dev/.well-known/agent-identity-statement.jws": {
+      "status": 500,
+      "headers": { "content-type": "text/plain" },
+      "body": "boom"
+    }
+  }
+}

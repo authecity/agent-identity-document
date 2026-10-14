@@ -1,0 +1,48 @@
+{
+  "verification": {
+    "subject": "alice.knownas.dev",
+    "provider": "knownas.dev",
+    "status": "suspended",
+    "status_source": "document",
+    "observed_at": "2026-10-14T12:00:00Z",
+    "checks": [
+      {
+        "name": "document.fetched",
+        "outcome": "verified",
+        "detail": "HTTPS, 200, application/json, 63 B",
+        "source": "https://alice.knownas.dev/.well-known/agent-identity.json"
+      },
+      {
+        "name": "document.schema",
+        "outcome": "verified",
+        "detail": "agent-identity-document.schema.json v1.0.1-draft"
+      },
+      {
+        "name": "document.host",
+        "outcome": "verified",
+        "detail": "fqdn is alice.knownas.dev"
+      },
+      {
+        "name": "owner.standing",
+        "outcome": "absent",
+        "detail": "a suspended identity publishes no owner block"
+      },
+      {
+        "name": "keys.directory",
+        "outcome": "verified",
+        "detail": "no active keys",
+        "source": "https://alice.knownas.dev/.well-known/http-message-signatures-directory"
+      },
+      {
+        "name": "platform.statement",
+        "outcome": "absent",
+        "detail": "no signed statement is served for this document yet",
+        "source": "https://alice.knownas.dev/.well-known/agent-identity-statement.jws"
+      }
+    ]
+  },
+  "summary": [
+    "alice.knownas.dev is suspended.",
+    "No active signing keys."
+  ]
+}

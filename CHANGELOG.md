@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-21 (release workflow)
+
+- `.github/workflows/release.yml`: a `packages-v<version>` tag publishes
+  `knownas-verify` to PyPI and `@knownas/verify` to npm through trusted
+  publishing, after checking the tag against both versions, the bundled
+  schemas against `schema/`, and both test suites. Nothing is released yet;
+  CONTRIBUTING.md says what the first release waits for.
+
 ## 2026-10-14 (integrations)
 
 - `integrations/`: three worked examples that refuse unverified agents and

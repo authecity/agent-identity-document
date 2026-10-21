@@ -1,0 +1,103 @@
+name: Release packages
+
+# Publishes knownas-verify (PyPI) and @knownas/verify (npm) from a tag, with
+# no token stored anywhere: both registries trust this workflow through
+# GitHub's OIDC identity (PyPI trusted publishing, npm trusted publishing).
+#
+#   git tag packages-v0.2.0 && git push origin packages-v0.2.0
+#
+# The tag's version must equal both packages' versions, and both test suites
+# must pass, before either registry is touched. The two packages share one
+# version because they share one contract and one set of expected results.
+on:
+  push:
+    tags: ["packages-v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Versions and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: The tag names both packages' version
+        run: |
+          tag="${GITHUB_REF_NAME#packages-v}"
+          py=$(python -c "import tomllib; print(tomllib.load(open('python/pyproject.toml','rb'))['project']['version'])")
+          ts=$(node -p "require('./typescript/package.json').version")
+          echo "tag $tag, python $py, typescript $ts"
+          test "$tag" = "$py" && test "$tag" = "$ts"
+      - name: The bundled schemas are the repository's
+        run: |
+          cmp schema/agent-identity-document.schema.json python/src/knownas_verify/schema/agent-identity-document.schema.json
+          cmp schema/agent-identity-document.schema.json typescript/schema/agent-identity-document.schema.json
+      - name: Python tests
+        working-directory: python
+        run: |
+          python -m pip install -e ".[dev]"
+          pytest
+      - name: TypeScript tests
+        working-directory: typescript
+        run: |
+          npm ci
+          npm run build
+          npm test
+
+  pypi:
+    name: PyPI
+    needs: check
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build
+        working-directory: python
+        run: |
+          python -m pip install build
+          python -m build
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/dist
+
+  npm:
+    name: npm
+    needs: check
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      id-token: write
+    defaults:
+      run:
+        working-directory: typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      # Trusted publishing needs a recent npm CLI; Node's bundled one may lag.
+      - name: Update npm
+        run: npm install -g npm@latest
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+      - name: Publish
+        run: npm publish --access public

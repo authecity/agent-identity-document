@@ -11,3 +11,25 @@
   IETF Trust's provisions (BCP 78 and 79) once the draft is submitted.
 - Be concrete. Every statement about another specification names the
   document and revision it was checked against.
+
+## Releasing the verifier packages
+
+`knownas-verify` (PyPI) and `@knownas/verify` (npm) are published by
+`.github/workflows/release.yml` when a tag `packages-v<version>` is pushed.
+No registry token is stored: both registries trust that workflow through
+GitHub's OIDC identity.
+
+1. Set the same version in `python/pyproject.toml` and
+   `typescript/package.json`, add a CHANGELOG entry, merge.
+2. `git tag packages-v<version>` on that commit and push the tag.
+
+The workflow refuses the release unless the tag matches both versions, the
+bundled schemas equal `schema/`, and both test suites pass.
+
+One-time setup, by the maintainer: a trusted publisher on PyPI for project
+`knownas-verify` (a pending publisher until the first release) and on npm
+for `@knownas/verify`, each naming this repository, `release.yml`, and the
+environment `pypi` or `npm`.
+
+The first release waits for the open-schema change (the reference
+implementation's ADR 0051), so that no strict reader is ever published.

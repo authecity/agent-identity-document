@@ -138,5 +138,5 @@ test("a signed, verified caller initialises and calls a tool", async () => {
   assert.equal(call.status, 200, call.body);
   const text = ((resultOf(call.body)["result"] as { content: { text: string }[] }).content[0] ?? { text: "" }).text;
   assert.ok(text.includes(`Calling agent: ${AGENT}`), text);
-  assert.ok(text.includes("Owner controls acme.example, checked 2026-10-02, renews 2026-11-01."), text);
+  assert.ok(text.includes("Owner controls the domain name acme.example, checked 2026-10-02, renews 2026-11-01."), text);
 });

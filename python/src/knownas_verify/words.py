@@ -1,7 +1,7 @@
 """``summarise``: the checks as short sentences for people.
 
 Each sentence states what was checked and when, in the wording the reference
-implementation's ADR 0037 allows ("Owner controls acme.example, checked
+implementation's ADR 0037 allows ("Owner controls the domain name acme.example, checked
 2026-10-02, renews 2026-11-01"). None of them says "trusted", "verified owner"
 without an object, a number, or a colour. A badge or a listing that prints
 anything should print these.
@@ -67,7 +67,9 @@ def _owner_line(check: Check) -> str | None:
         subject = check.detail.split(",")[0].strip() if check.detail.startswith("controls") else ""
         if check.outcome == "invalid" and not subject:
             return f"A domain check could not be read ({check.detail})."
-        return f"Owner {subject or 'controls a domain'}{when}{until}."
+        domain = subject.removeprefix("controls ").strip()
+        what = f"the domain name {domain}" if domain else "a domain name"
+        return f"Owner controls {what}{when}{until}."
     if kind == "email":
         day = f" {_day(check.verified_at)}" if check.verified_at else ""
         return f"Owner's email address was checked{day}{until}."

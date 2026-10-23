@@ -2,7 +2,7 @@
  * `summarise`: the checks as short sentences for people.
  *
  * Each sentence states what was checked and when, in the wording the
- * reference implementation's ADR 0037 allows ("Owner controls acme.example,
+ * reference implementation's ADR 0037 allows ("Owner controls the domain name acme.example,
  * checked 2026-10-02, renews 2026-11-01"). None of them says "trusted",
  * "verified owner" without an object, a number, or a colour. A badge or a
  * listing that prints anything should print these.
@@ -79,7 +79,9 @@ function ownerLine(c: Check): string | null {
       : "";
     if (c.outcome === "invalid" && !subject)
       return `A domain check could not be read (${detail}).`;
-    return `Owner ${subject || "controls a domain"}${when}${until}.`;
+    const domain = subject.replace(/^controls /, "").trim();
+    const what = domain ? `the domain name ${domain}` : "a domain name";
+    return `Owner controls ${what}${when}${until}.`;
   }
   if (kind === "email") {
     const d = c.verified_at ? ` ${day(c.verified_at)}` : "";

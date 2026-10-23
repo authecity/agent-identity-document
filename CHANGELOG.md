@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-23 (wording)
+
+- `python/`, `typescript/`: `summarise` words a domain check as "Owner
+  controls the domain name acme.example, …", parallel to the GitHub line,
+  so a reader new to DNS is not left to guess what `acme.example` is.
+  The spec's example sentence says the same. Expected results regenerated.
+
 ## 2026-10-23 (the `github` check type)
 
 - `spec/`: the owner block defines a third check type, `github` (the

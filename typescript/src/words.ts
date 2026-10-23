@@ -97,6 +97,7 @@ function ownerLine(c: Check): string | null {
     if (!login) return `A GitHub check could not be read (${detail}).`;
     return `Owner controls the GitHub account @${login}${when}${until}.`;
   }
+  if (kind === "person") return personLine(c);
   return `Owner check '${kind}'${when}${until}.`;
 }
 
@@ -111,4 +112,36 @@ function signatureLine(c: Check): string {
 
 function day(stamp: string | undefined): string {
   return (stamp ?? "").slice(0, 10);
+}
+
+/** What a person check's `method` says was looked at. */
+const PERSON_METHODS: Record<string, string> = {
+  "document-selfie": "Owner's identity document and selfie were checked",
+  document: "Owner's identity document was checked",
+};
+
+/** A document check is not renewed, so it is "valid until", never
+ * "renews"; and it names no one. Mirrors the Python `_person_line`. */
+function personLine(c: Check): string {
+  const detail = c.detail ?? "";
+  const parts = detail
+    .split(";")[0]!
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p !== "");
+  if (c.outcome === "invalid" && !c.verified_at)
+    return `A person check could not be read (${detail}).`;
+  const method = parts.find((p) => !p.startsWith("by ")) ?? "";
+  const verifier = (parts.find((p) => p.startsWith("by ")) ?? "").replace(/^by /, "");
+  const lead = PERSON_METHODS[method] ?? "A person check was made for the owner";
+  const by = verifier ? ` by ${verifier}` : "";
+  const on = c.verified_at ? ` on ${day(c.verified_at)}` : "";
+  let until = "";
+  if (c.expires_at) {
+    until =
+      c.outcome === "invalid" && detail.includes("expired")
+        ? `, expired ${day(c.expires_at)}`
+        : `, valid until ${day(c.expires_at)}`;
+  }
+  return `${lead}${by}${on}${until}.`;
 }

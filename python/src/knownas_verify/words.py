@@ -71,6 +71,11 @@ def _owner_line(check: Check) -> str | None:
     if kind == "email":
         day = f" {_day(check.verified_at)}" if check.verified_at else ""
         return f"Owner's email address was checked{day}{until}."
+    if kind == "github":
+        login = check.detail.split(",")[0].strip() if check.detail.startswith("controls") else ""
+        if not login:
+            return f"A GitHub check could not be read ({check.detail})."
+        return f"Owner controls the GitHub account @{login.removeprefix('controls ')}{when}{until}."
     return f"Owner check '{kind}'{when}{until}."
 
 

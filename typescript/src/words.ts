@@ -8,10 +8,22 @@
  * listing that prints anything should print these.
  */
 
-import { UNKNOWN, UNREACHABLE, type Check, type Verification } from "./result.ts";
+import {
+  UNKNOWN,
+  UNREACHABLE,
+  type Check,
+  type Verification,
+} from "./result.ts";
 
 /** Words these sentences never use. Tested. */
-export const FORBIDDEN_WORDS = ["trusted", "trustworthy", "safe", "verified owner", "level", "score"] as const;
+export const FORBIDDEN_WORDS = [
+  "trusted",
+  "trustworthy",
+  "safe",
+  "verified owner",
+  "level",
+  "score",
+] as const;
 
 export function summarise(verification: Verification): string[] {
   const lines = [statusLine(verification)];
@@ -48,7 +60,8 @@ function ownerLine(c: Check): string | null {
   const kind = c.name.replace(/^owner\./, "");
   const detail = c.detail ?? "";
   if (kind === "standing") {
-    if (c.outcome === "verified" && detail) return `${detail.charAt(0).toUpperCase()}${detail.slice(1)}.`;
+    if (c.outcome === "verified" && detail)
+      return `${detail.charAt(0).toUpperCase()}${detail.slice(1)}.`;
     return null;
   }
   if (c.outcome === "absent") return null;
@@ -61,21 +74,36 @@ function ownerLine(c: Check): string | null {
         : `, renews ${day(c.expires_at)}`;
   }
   if (kind === "domain") {
-    const subject = detail.startsWith("controls") ? detail.split(",")[0]!.trim() : "";
-    if (c.outcome === "invalid" && !subject) return `A domain check could not be read (${detail}).`;
+    const subject = detail.startsWith("controls")
+      ? detail.split(",")[0]!.trim()
+      : "";
+    if (c.outcome === "invalid" && !subject)
+      return `A domain check could not be read (${detail}).`;
     return `Owner ${subject || "controls a domain"}${when}${until}.`;
   }
   if (kind === "email") {
     const d = c.verified_at ? ` ${day(c.verified_at)}` : "";
     return `Owner's email address was checked${d}${until}.`;
   }
+  if (kind === "github") {
+    const login = detail.startsWith("controls")
+      ? detail
+          .split(",")[0]!
+          .trim()
+          .replace(/^controls /, "")
+      : "";
+    if (!login) return `A GitHub check could not be read (${detail}).`;
+    return `Owner controls the GitHub account @${login}${when}${until}.`;
+  }
   return `Owner check '${kind}'${when}${until}.`;
 }
 
 function signatureLine(c: Check): string {
   const detail = c.detail ?? "";
-  if (c.outcome === "verified") return `The request was signed with a published key (${detail}).`;
-  if (c.outcome === "invalid") return `The request's signature does not verify (${detail}).`;
+  if (c.outcome === "verified")
+    return `The request was signed with a published key (${detail}).`;
+  if (c.outcome === "invalid")
+    return `The request's signature does not verify (${detail}).`;
   return `The request's signature could not be checked (${detail}).`;
 }
 

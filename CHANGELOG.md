@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-23 (the `github` check type)
+
+- `spec/`: the owner block defines a third check type, `github` (the
+  account holder authorized the provider as that GitHub account; `value`
+  is the login as last read, `method` is `oauth`), and the privacy
+  considerations say what it publishes. No schema change: `type` was
+  already an open string, and unknown types were already ignored.
+- `tests/`: a fixture with a `github` check, and its expected result.
+- `python/`, `typescript/`: `summarise` words a `github` check as "Owner
+  controls the GitHub account @login, checked …". The check itself was
+  already reported as `owner.github`.
+
 ## 2026-10-14 (integrations)
 
 - `integrations/`: three worked examples that refuse unverified agents and

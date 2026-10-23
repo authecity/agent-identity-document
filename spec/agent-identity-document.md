@@ -291,7 +291,8 @@ Each member of `verifications` is an object with:
 
 `type`:
 : String. This document defines `email` (the account holder controlled the
-  sign-up mailbox) and `domain` (the account holder controls a DNS name).
+  sign-up mailbox), `domain` (the account holder controls a DNS name) and
+  `github` (the account holder controls a GitHub account; see below).
   Further types, such as a check on a legal entity or a natural person, MAY
   be defined; a relying party MUST ignore types it does not understand.
 
@@ -299,8 +300,8 @@ Each member of `verifications` is an object with:
 : String, an [RFC 3339] timestamp. REQUIRED.
 
 `value`:
-: String. What was checked, where that is public (a domain name). For
-  `email` the address itself MUST NOT be published. OPTIONAL.
+: String. What was checked, where that is public (a domain name, a GitHub
+  login). For `email` the address itself MUST NOT be published. OPTIONAL.
 
 `method`, `verifier`:
 : Strings naming how and by whom the check was made. OPTIONAL.
@@ -308,6 +309,17 @@ Each member of `verifications` is an object with:
 `expires_at`:
 : String, an [RFC 3339] timestamp after which the check MUST be treated as
   stale. OPTIONAL; a check without it does not expire.
+
+A `github` check says that the account holder authorized the provider, as
+the GitHub account named in `value`, at `verified_at`; `method` is `oauth`.
+The provider binds the account's numeric id, which GitHub keeps fixed, and
+publishes its login, which the holder can change: `value` is the login as
+the provider last read it, and a reader that resolves the login on GitHub
+MAY find it re-used by someone else between a rename and the provider's
+next read. `expires_at` bounds how stale the login can be, as a check is
+renewed only by re-reading the account by id. A provider publishes the
+login only when the account holder asked for the check; it MUST NOT publish
+an email address, name or account age read from GitHub.
 
 `standing` carries `account_since` (an [RFC 3339] full-date) and `status`,
 which is `active` whenever the block is present; a provider MUST omit the
@@ -422,7 +434,9 @@ The document publishes: a hostname, endpoints, a status, the operator's
 chosen descriptive text, and the provider's checks. For an `email` check the
 address is not published, only that a check occurred and when. For a
 `domain` check the domain name is published, since control of a public name
-is itself public. `account_since` reveals when the account was created and
+is itself public. For a `github` check the login is published, a pseudonym
+by GitHub's own design, and only because the account holder asked; nothing
+else read from GitHub is published. `account_since` reveals when the account was created and
 nothing else about the holder. A provider MUST let an account holder export
 and erase their data, and MUST remove an identity's document promptly on
 deletion; what the append-only audit trail retains is the provider's

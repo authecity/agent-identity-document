@@ -329,7 +329,7 @@ Relying parties MUST interpret checks by type and date. The absence of a
 check is the absence of information and MUST NOT be presented as a
 negative finding; many legitimate operators cannot or will not complete
 deeper checks. Human-facing presentations SHOULD say what was checked
-("owner controls acme.example") and SHOULD NOT say "verified" or "trusted"
+("owner controls the domain name acme.example") and SHOULD NOT say "verified" or "trusted"
 without an object.
 
 # Provider practices

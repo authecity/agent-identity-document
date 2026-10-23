@@ -22,7 +22,7 @@ if (require(v, "document.schema", "owner.domain")) {
 for (const line of summarise(v)) console.log(line);
 // alice.knownas.dev is active, as published by knownas.dev.
 // Owner's email address was checked 2026-09-21.
-// Owner controls acme.example, checked 2026-10-02, renews 2026-11-01.
+// Owner controls the domain name acme.example, checked 2026-10-02, renews 2026-11-01.
 // Account since 2026-09-21, active.
 // 2 active keys published.
 ```

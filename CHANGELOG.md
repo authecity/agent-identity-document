@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-23 (the `person` check type)
+
+- `spec/`: the owner block defines a fourth check type, `person` (the party
+  named in `verifier` checked a government identity document presented for
+  the account, with a matching selfie where `method` is `document-selfie`).
+  It has no `value`: no name or other attribute of the person is published,
+  nor the vendor's identifier for the check. `expires_at` is fixed, the
+  check is not renewed in place, and it says nothing about other accounts.
+  The privacy considerations say so. No schema change.
+- `tests/`: a fixture with a `person` check, and its expected result.
+- `python/`, `typescript/`: `summarise` words a `person` check as "Owner's
+  identity document and selfie were checked by stripe on …, valid until …".
+  The check itself was already reported as `owner.person`.
+
 ## 2026-10-23 (wording)
 
 - `python/`, `typescript/`: `summarise` words a domain check as "Owner

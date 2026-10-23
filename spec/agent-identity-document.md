@@ -291,10 +291,11 @@ Each member of `verifications` is an object with:
 
 `type`:
 : String. This document defines `email` (the account holder controlled the
-  sign-up mailbox), `domain` (the account holder controls a DNS name) and
-  `github` (the account holder controls a GitHub account; see below).
-  Further types, such as a check on a legal entity or a natural person, MAY
-  be defined; a relying party MUST ignore types it does not understand.
+  sign-up mailbox), `domain` (the account holder controls a DNS name),
+  `github` (the account holder controls a GitHub account) and `person` (a
+  natural person's identity document was checked for the account); see
+  below for the last two. Further types, such as a check on a legal entity,
+  MAY be defined; a relying party MUST ignore types it does not understand.
 
 `verified_at`:
 : String, an [RFC 3339] timestamp. REQUIRED.
@@ -320,6 +321,23 @@ next read. `expires_at` bounds how stale the login can be, as a check is
 renewed only by re-reading the account by id. A provider publishes the
 login only when the account holder asked for the check; it MUST NOT publish
 an email address, name or account age read from GitHub.
+
+A `person` check says that, at `verified_at`, the party named in `verifier`
+checked a government-issued identity document presented for the account
+and, where `method` is `document-selfie`, matched a live image of a face to
+the document's photograph; `method` `document` means the document alone.
+`verifier` names whoever performed the check, which for this type is
+normally a vendor rather than the provider. The check has no `value`: a
+provider MUST NOT publish a name, a date of birth, an address, a document
+number or any other attribute read from the document, nor the vendor's
+identifier for the check. A document cannot be re-read the way a DNS record
+or an account can, so `expires_at` is a fixed time after `verified_at` and
+the check is not renewed in place; a later check replaces it. The check
+says that an identifiable person completed it for this account, and
+nothing about who: it does not say that the same person stands behind no
+other account, and a relying party MUST NOT infer that. Who the person is
+remains with the provider and its vendor, for whatever lawful process
+applies to them.
 
 `standing` carries `account_since` (an [RFC 3339] full-date) and `status`,
 which is `active` whenever the block is present; a provider MUST omit the
@@ -436,7 +454,9 @@ address is not published, only that a check occurred and when. For a
 `domain` check the domain name is published, since control of a public name
 is itself public. For a `github` check the login is published, a pseudonym
 by GitHub's own design, and only because the account holder asked; nothing
-else read from GitHub is published. `account_since` reveals when the account was created and
+else read from GitHub is published. For a `person` check only the fact, the
+method, the verifier and the dates are published; no attribute of the
+person is. `account_since` reveals when the account was created and
 nothing else about the holder. A provider MUST let an account holder export
 and erase their data, and MUST remove an identity's document promptly on
 deletion; what the append-only audit trail retains is the provider's

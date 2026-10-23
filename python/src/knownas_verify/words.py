@@ -78,7 +78,37 @@ def _owner_line(check: Check) -> str | None:
         if not login:
             return f"A GitHub check could not be read ({check.detail})."
         return f"Owner controls the GitHub account @{login.removeprefix('controls ')}{when}{until}."
+    if kind == "person":
+        return _person_line(check)
     return f"Owner check '{kind}'{when}{until}."
+
+
+#: What a person check's ``method`` says was looked at.
+_PERSON_METHODS = {
+    "document-selfie": "Owner's identity document and selfie were checked",
+    "document": "Owner's identity document was checked",
+}
+
+
+def _person_line(check: Check) -> str:
+    """A document check is not renewed, so it is "valid until", never
+    "renews"; and it names no one."""
+    parts = [part.strip() for part in check.detail.split(";")[0].split(",") if part.strip()]
+    if check.outcome == "invalid" and not check.verified_at:
+        return f"A person check could not be read ({check.detail})."
+    method = next((p for p in parts if not p.startswith("by ")), "")
+    verifier = next((p.removeprefix("by ") for p in parts if p.startswith("by ")), "")
+    lead = _PERSON_METHODS.get(method, "A person check was made for the owner")
+    by = f" by {verifier}" if verifier else ""
+    on = f" on {_day(check.verified_at)}" if check.verified_at else ""
+    until = ""
+    if check.expires_at:
+        until = (
+            f", expired {_day(check.expires_at)}"
+            if check.outcome == "invalid" and "expired" in check.detail
+            else f", valid until {_day(check.expires_at)}"
+        )
+    return f"{lead}{by}{on}{until}."
 
 
 def _signature_line(check: Check) -> str:

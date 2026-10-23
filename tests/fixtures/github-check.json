@@ -1,0 +1,102 @@
+{
+  "description": "An active identity whose owner connected a GitHub account: the check is reported as owner.github and worded with the login.",
+  "subject": "alice.knownas.dev",
+  "now": "2026-10-14T12:00:00Z",
+  "responses": {
+    "https://alice.knownas.dev/.well-known/agent-identity.json": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "cache-control": "public, max-age=60",
+        "x-content-type-options": "nosniff",
+        "access-control-allow-origin": "*"
+      },
+      "body": {
+        "version": "1",
+        "name": "Alice",
+        "status": "active",
+        "fqdn": "alice.knownas.dev",
+        "endpoints": {
+          "web": "https://alice.knownas.dev",
+          "manifest": "https://alice.knownas.dev/.well-known/agent-identity.json",
+          "api": "https://alice.api.knownas.dev",
+          "mcp": "https://alice.mcp.knownas.dev"
+        },
+        "description": "Answers questions about the Acme product catalogue.",
+        "owner": {
+          "verifications": [
+            {
+              "type": "email",
+              "verified_at": "2026-09-21T14:02:11+00:00"
+            },
+            {
+              "type": "domain",
+              "value": "acme.example",
+              "method": "dns-txt",
+              "verifier": "knownas.dev",
+              "verified_at": "2026-10-02T09:00:00+00:00",
+              "expires_at": "2026-11-01T09:00:00+00:00"
+            },
+            {
+              "type": "github",
+              "value": "octocat",
+              "method": "oauth",
+              "verifier": "knownas.dev",
+              "verified_at": "2026-10-23T12:00:00+00:00",
+              "expires_at": "2026-11-22T12:00:00+00:00"
+            }
+          ],
+          "standing": {
+            "account_since": "2026-09-21",
+            "status": "active"
+          }
+        },
+        "contact": {
+          "email": "agents@acme.example"
+        },
+        "homepage": "https://acme.example/alice",
+        "metadata": {
+          "framework": "langgraph"
+        }
+      }
+    },
+    "https://alice.knownas.dev/.well-known/http-message-signatures-directory": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/http-message-signatures-directory+json",
+        "cache-control": "public, max-age=300",
+        "access-control-allow-origin": "*"
+      },
+      "body": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
+            "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
+            "alg": "ed25519",
+            "use": "sig"
+          },
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "kid": "oD0HwocPBSfpNy5W3bpJeyFGY_IQ_YpqxSjQ3Yd-CLA",
+            "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+            "alg": "ed25519",
+            "use": "sig"
+          }
+        ]
+      }
+    },
+    "https://alice.knownas.dev/.well-known/agent-identity-statement.jws": {
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "access-control-allow-origin": "*"
+      },
+      "body": {
+        "error": "not_found"
+      }
+    }
+  }
+}

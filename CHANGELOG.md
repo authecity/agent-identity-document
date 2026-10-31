@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased (will be draft -02)
+
+- `draft/`: the source is renamed `-02` and carries the changes queued since
+  `-01` (see its "Changes since -01"): no `submissiontype`; ANS described per
+  ANS-0, cited at a pinned commit, with the lifecycle difference named; new
+  "Hosted key directories", "Signature Agent Cards" and "Client
+  classification" subsections; an empty key set on suspension; deprecation
+  headers on the old path; the `github` check type; the correlation
+  paragraph in the privacy considerations. The `-01` renders are removed:
+  the IETF archive is the record.
+- `spec/`: the same text, with the new references listed.
+- `README.md`: points at the `-02` source.
+
 ## 2026-10-23 (wording)
 
 - `python/`, `typescript/`: `summarise` words a domain check as "Owner

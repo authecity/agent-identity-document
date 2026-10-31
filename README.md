@@ -67,7 +67,7 @@ Nothing needs installing. The IETF's [Author Tools](https://author-tools.ietf.or
 accept kramdown-rfc Markdown and return XML, text and HTML, and run `idnits`.
 
 1. Open <https://author-tools.ietf.org/>, upload
-   `draft/draft-alla-agent-identity-document-01.md`, and download the
+   `draft/draft-alla-agent-identity-document-02.md`, and download the
    generated **XML (v3)** and **text**. Fix anything `idnits` reports.
 2. Go to <https://datatracker.ietf.org/submit/>, upload the XML, confirm the
    author details, and click the confirmation link that arrives by e-mail.
@@ -91,7 +91,7 @@ accept kramdown-rfc Markdown and return XML, text and HTML, and run `idnits`.
    standards body adopts the format.
 
 To render locally instead: `gem install kramdown-rfc` and
-`pip install xml2rfc`, then `kdrfc draft/draft-alla-agent-identity-document-01.md`.
+`pip install xml2rfc`, then `kdrfc draft/draft-alla-agent-identity-document-02.md`.
 
 ## Status
 

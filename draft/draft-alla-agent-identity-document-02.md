@@ -1,9 +1,8 @@
 ---
 title: "The Agent Identity Document: A Hosted, Accountable Public Record for AI Agents"
 abbrev: Agent Identity Document
-docname: draft-alla-agent-identity-document-01
+docname: draft-alla-agent-identity-document-02
 category: info
-submissiontype: IETF
 ipr: trust200902
 keyword:
   - AI agents
@@ -35,9 +34,21 @@ normative:
 
 informative:
   RFC9421:
+  RFC9745:
+  RFC8594:
+  RFC5829:
   I-D.ietf-webbotauth-httpsig-protocol:
+  I-D.singh-webbotauth-hosted-directories:
+  I-D.meunier-webbotauth-registry:
+  I-D.jovancevic-vicdm:
   I-D.narajala-courtney-ansv2:
   I-D.pro-adp-agent-discovery:
+  ANS0:
+    title: "ANS-0: Identity (Agent Name Service specification, draft v1.0, version 0.2.0)"
+    author:
+      - org: Agent Name Service project
+    date: 2026-08-20
+    target: https://github.com/agentnameservice/ans-registry/blob/1e005c6eaf51759308932b96d76b1d5cb49e3e31/spec/ans-0-identity-anchor.md
   A2A:
     title: Agent2Agent (A2A) Protocol Specification
     author:
@@ -86,9 +97,11 @@ none of this by default. They borrow their operator's credentials, run from
 addresses nobody can trace, and carry no name that another system can look
 up.
 
-Several efforts address parts of the gap. The Agent Name Service
-{{I-D.narajala-courtney-ansv2}} anchors an agent to a domain the operator
-controls and a certificate hierarchy. The A2A Agent Card {{A2A}} describes an
+Several efforts address parts of the gap. The Agent Name Service {{ANS0}}
+{{I-D.narajala-courtney-ansv2}} anchors an agent to a domain name whose
+control its operator proves, and lets the operator hold separately proven
+identities such as a decentralised identifier or a Legal Entity Identifier,
+sealed in a transparency log. The A2A Agent Card {{A2A}} describes an
 agent's capabilities at `/.well-known/agent-card.json`. The Agent Discovery
 Protocol {{I-D.pro-adp-agent-discovery}} describes discovery metadata.
 Web Bot Auth {{I-D.ietf-webbotauth-httpsig-protocol}} lets an agent sign its
@@ -342,7 +355,8 @@ Each member of `verifications` is an object with:
 
 `type`:
 : String. This document defines `email` (the account holder controlled the
-  sign-up mailbox) and `domain` (the account holder controls a DNS name).
+  sign-up mailbox), `domain` (the account holder controls a DNS name) and
+  `github` (the account holder controls a GitHub account; see below).
   Further types, such as a check on a legal entity or a natural person, MAY
   be defined; a relying party MUST ignore types it does not understand.
 
@@ -350,8 +364,8 @@ Each member of `verifications` is an object with:
 : String, an {{RFC3339}} timestamp. REQUIRED.
 
 `value`:
-: String. What was checked, where that is public (a domain name). For
-  `email` the address itself MUST NOT be published. OPTIONAL.
+: String. What was checked, where that is public (a domain name, a GitHub
+  login). For `email` the address itself MUST NOT be published. OPTIONAL.
 
 `method`, `verifier`:
 : Strings naming how and by whom the check was made. OPTIONAL.
@@ -359,6 +373,17 @@ Each member of `verifications` is an object with:
 `expires_at`:
 : String, an {{RFC3339}} timestamp after which the check MUST be treated as
   stale. OPTIONAL; a check without it does not expire.
+
+A `github` check says that the account holder authorized the provider, as
+the GitHub account named in `value`, at `verified_at`; `method` is `oauth`.
+The provider binds the account's numeric id, which GitHub keeps fixed, and
+publishes its login, which the holder can change: `value` is the login as
+the provider last read it, and a reader that resolves the login on GitHub
+MAY find it re-used by someone else between a rename and the provider's
+next read. `expires_at` bounds how stale the login can be, as a check is
+renewed only by re-reading the account by id. A provider publishes the
+login only when the account holder asked for the check; it MUST NOT publish
+an email address, name or account age read from GitHub.
 
 `standing` carries `account_since` (an {{RFC3339}} full-date) and `status`,
 which is `active` whenever the block is present; a provider MUST omit the
@@ -368,8 +393,8 @@ Relying parties MUST interpret checks by type and date. The absence of a
 check is the absence of information and MUST NOT be presented as a
 negative finding; many legitimate operators cannot or will not complete
 deeper checks. Human-facing presentations SHOULD say what was checked
-("owner controls acme.example") and SHOULD NOT say "verified" or "trusted"
-without an object.
+("owner controls the domain name acme.example") and SHOULD NOT say
+"verified" or "trusted" without an object.
 
 # Provider practices {#provider-practices}
 
@@ -417,16 +442,65 @@ profiled by Web Bot Auth {{I-D.ietf-webbotauth-httpsig-protocol}}, the natural
 the key directory is served by the provider at
 `/.well-known/http-message-signatures-directory` on that origin. A verifier
 that resolves the signature then already knows where the Agent Identity
-Document is. The `public_key` member of this document is unrelated to that
-directory and carries no verification semantics of its own.
+Document is. When an identity is suspended, the provider SHOULD serve an
+empty key set at that directory with a success status, so that a verifier
+that re-fetches replaces its cached keys rather than retaining them; the
+reference implementation does so. The `public_key` member of this document
+is unrelated to that directory and carries no verification semantics of its
+own.
+
+## Hosted key directories
+
+{{I-D.singh-webbotauth-hosted-directories}} describes the hosted
+(multi-tenant) key directory model, in which a provider serves key
+directories for many agent operators who keep their own private keys. A
+provider following this document in that model serves one directory per
+identity hostname (the first remedy in Section 4 of that document), and the
+Agent Identity Document on the same hostname is where the provider
+publishes, per agent, the operator verification practices that its
+Section 8 asks a hosted directory operator to make legible.
+
+## Signature Agent Cards
+
+{{I-D.meunier-webbotauth-registry}} defines the Signature Agent Card, in
+which a signature agent describes itself: its identity, purpose, rate
+expectations and keys. An Agent Identity Document differs in who speaks.
+Apart from the operator-asserted members, its statements (the lifecycle
+status and the checks in `owner`) are the provider's, about an operator who
+may hold no domain and no key. A provider MAY serve both on the identity
+hostname; neither replaces the other.
+
+## Client classification
+
+{{I-D.jovancevic-vicdm}} classifies a client by the strength of the evidence
+a server can verify about it. An Agent Identity Document is an input to such
+a classification, not a class: it carries no grade, only itemised, dated
+checks. A bare claim to an identity hostname is no stronger than any other
+unverified claim; a request signed with a key published in the identity's
+directory ({{signing}}) gives a verifier evidence it can check; and on
+suspension the provider empties that directory, so the agent's claims fall
+back to unverified at the next fetch.
 
 ## Domain-anchored identity
 
-ANS {{I-D.narajala-courtney-ansv2}} and similar work anchor an agent to a
-domain the operator controls. This document is complementary: a hosted
-identity is for operators who have no domain, and an operator who later
-proves control of a domain publishes that as a `domain` check in the owner
-block. Nothing here prevents a provider from also issuing ANS records.
+ANS {{ANS0}} {{I-D.narajala-courtney-ansv2}} anchors every agent
+registration to one fully qualified domain name whose control the operator
+proves at registration time, and lets an operator hold Verified Identities
+(a `did:web` or `did:key` identifier, a Legal Entity Identifier or an ENS
+name), each proven by a control proof, sealed in a transparency log and
+linked to the operator's agents. An operator with a Legal Entity Identifier
+is therefore anchored to it directly, not through optional metadata. This
+document is complementary: a hosted identity is for operators who have no
+domain, and an operator who later proves control of a domain publishes that
+as a `domain` check in the owner block. Nothing here prevents a provider
+from also issuing ANS records.
+
+The lifecycles differ in one respect worth naming. ANS has a soft
+`DEPRECATED` state for a superseded version of an agent and the terminal
+states `REVOKED` and `EXPIRED`; it has no reversible suspension by the
+operator or the registry. The `suspended` status of this document
+({{status}}) is reversible by design, and a relying party MUST NOT read it
+as terminal.
 
 ## Compatibility {#compat}
 
@@ -435,7 +509,11 @@ The reference implementation has served this document at
 its version 0.3.0 and has been proposed for other formats. Providers
 SHOULD serve this document at `/.well-known/agent-identity.json` and MAY
 continue to serve it at `/.well-known/agent.json` during a transition; a
-relying party SHOULD try the former first.
+relying party SHOULD try the former first. A provider that continues to
+serve the old path SHOULD mark it with the `Deprecation` {{RFC9745}} and
+`Sunset` {{RFC8594}} header fields and a `Link` header field with the
+`successor-version` relation {{RFC5829}} pointing at the new path; the
+reference implementation does so.
 
 # Security Considerations
 
@@ -473,11 +551,21 @@ The document publishes: a hostname, endpoints, a status, the operator's
 chosen descriptive text, and the provider's checks. For an `email` check the
 address is not published, only that a check occurred and when. For a
 `domain` check the domain name is published, since control of a public name
-is itself public. `account_since` reveals when the account was created and
-nothing else about the holder. A provider MUST let an account holder export
-and erase their data, and MUST remove an identity's document promptly on
-deletion; what the append-only audit trail retains is the provider's
-documented retention decision.
+is itself public. For a `github` check the login is published, a pseudonym
+by GitHub's own design, and only because the account holder asked; nothing
+else read from GitHub is published. `account_since` reveals when the account
+was created and nothing else about the holder. A provider MUST let an
+account holder export and erase their data, and MUST remove an identity's
+document promptly on deletion; what the append-only audit trail retains is
+the provider's documented retention decision.
+
+Where an identity also signs its requests ({{signing}}), each signed request
+names the identity hostname, so receivers can recognise that agent's
+requests and correlate them across origins, whatever key it uses (see
+Section 7.1 of {{I-D.ietf-webbotauth-httpsig-protocol}}). When the account
+holder is a natural person, a provider SHOULD tell them so before enabling
+signing, and SHOULD NOT publish the person's name in the document unless
+they put it in operator-asserted text themselves.
 
 # IANA Considerations
 
@@ -544,6 +632,30 @@ The same identity, suspended:
 The hostnames are the reference implementation's real base domain rather
 than the reserved example domains of RFC 2606, because the document
 describes a practice in production there.
+
+# Changes since -01
+
+- The source no longer declares a submission type: the document has no
+  stream.
+- The Agent Name Service is described per ANS-0: an agent is anchored to a
+  domain name whose control is proven, and an operator may hold separately
+  proven identities (a decentralised identifier, a Legal Entity Identifier,
+  an ENS name). ANS-0 is cited beside the Internet-Draft, which has
+  expired. The lifecycle difference (ANS has no reversible suspension) is
+  named.
+- New subsections under "Relationship to other work": "Hosted key
+  directories" (draft-singh-webbotauth-hosted-directories), "Signature
+  Agent Cards" (draft-meunier-webbotauth-registry) and "Client
+  classification" (draft-jovancevic-vicdm).
+- "Signed requests": on suspension the provider SHOULD serve an empty key
+  set with a success status.
+- "Compatibility": the old path SHOULD carry `Deprecation`, `Sunset` and a
+  `successor-version` link.
+- The owner block defines a third check type, `github`, and the privacy
+  considerations say what it publishes.
+- "Privacy Considerations": signed requests make an agent recognisable
+  across origins; a natural person SHOULD be told before signing is
+  enabled.
 
 # Changes since -00
 

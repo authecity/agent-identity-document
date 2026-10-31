@@ -502,6 +502,11 @@ operator or the registry. The `suspended` status of this document
 ({{status}}) is reversible by design, and a relying party MUST NOT read it
 as terminal.
 
+A provider signature over the Agent Identity Document, and where the
+history of a document's changes would be recorded so that an unauthorised
+change is detectable afterwards, is under discussion with the ANS project
+and is not specified in this revision.
+
 ## Compatibility {#compat}
 
 The reference implementation has served this document at
@@ -647,6 +652,9 @@ describes a practice in production there.
   directories" (draft-singh-webbotauth-hosted-directories), "Signature
   Agent Cards" (draft-meunier-webbotauth-registry) and "Client
   classification" (draft-jovancevic-vicdm).
+- "Domain-anchored identity" notes that a provider signature over the
+  document, and a record of its change history, are under discussion with
+  the ANS project and not specified here.
 - "Signed requests": on suspension the provider SHOULD serve an empty key
   set with a success status.
 - "Compatibility": the old path SHOULD carry `Deprecation`, `Sunset` and a

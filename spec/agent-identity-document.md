@@ -440,6 +440,11 @@ operator or the registry. The `suspended` status of this document
 (see "Lifecycle status") is reversible by design, and a relying party MUST NOT read it
 as terminal.
 
+A provider signature over the Agent Identity Document, and where the
+history of a document's changes would be recorded so that an unauthorised
+change is detectable afterwards, is under discussion with the ANS project
+and is not specified in this revision.
+
 ## Compatibility
 
 The reference implementation has served this document at

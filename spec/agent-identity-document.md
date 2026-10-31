@@ -35,9 +35,11 @@ none of this by default. They borrow their operator's credentials, run from
 addresses nobody can trace, and carry no name that another system can look
 up.
 
-Several efforts address parts of the gap. The Agent Name Service
-[draft-narajala-courtney-ansv2] anchors an agent to a domain the operator
-controls and a certificate hierarchy. The A2A Agent Card [A2A] describes an
+Several efforts address parts of the gap. The Agent Name Service [ANS-0]
+[draft-narajala-courtney-ansv2] anchors an agent to a domain name whose
+control its operator proves, and lets the operator hold separately proven
+identities such as a decentralised identifier or a Legal Entity Identifier,
+sealed in a transparency log. The A2A Agent Card [A2A] describes an
 agent's capabilities at `/.well-known/agent-card.json`. The Agent Discovery
 Protocol [draft-pro-adp-agent-discovery] describes discovery metadata.
 Web Bot Auth [draft-ietf-webbotauth-httpsig-protocol] lets an agent sign its
@@ -378,16 +380,70 @@ profiled by Web Bot Auth [draft-ietf-webbotauth-httpsig-protocol], the natural
 the key directory is served by the provider at
 `/.well-known/http-message-signatures-directory` on that origin. A verifier
 that resolves the signature then already knows where the Agent Identity
-Document is. The `public_key` member of this document is unrelated to that
-directory and carries no verification semantics of its own.
+Document is. When an identity is suspended, the provider SHOULD serve an
+empty key set at that directory with a success status, so that a verifier
+that re-fetches replaces its cached keys rather than retaining them; the
+reference implementation does so. The `public_key` member of this document
+is unrelated to that directory and carries no verification semantics of its
+own.
+
+## Hosted key directories
+
+[draft-singh-webbotauth-hosted-directories] describes the hosted
+(multi-tenant) key directory model, in which a provider serves key
+directories for many agent operators who keep their own private keys. A
+provider following this document in that model serves one directory per
+identity hostname (the first remedy in Section 4 of that document), and the
+Agent Identity Document on the same hostname is where the provider
+publishes, per agent, the operator verification practices that its
+Section 8 asks a hosted directory operator to make legible.
+
+## Signature Agent Cards
+
+[draft-meunier-webbotauth-registry] defines the Signature Agent Card, in
+which a signature agent describes itself: its identity, purpose, rate
+expectations and keys. An Agent Identity Document differs in who speaks.
+Apart from the operator-asserted members, its statements (the lifecycle
+status and the checks in `owner`) are the provider's, about an operator who
+may hold no domain and no key. A provider MAY serve both on the identity
+hostname; neither replaces the other.
+
+## Client classification
+
+[draft-jovancevic-vicdm] classifies a client by the strength of the evidence
+a server can verify about it. An Agent Identity Document is an input to such
+a classification, not a class: it carries no grade, only itemised, dated
+checks. A bare claim to an identity hostname is no stronger than any other
+unverified claim; a request signed with a key published in the identity's
+directory (see "Signed requests") gives a verifier evidence it can check; and on
+suspension the provider empties that directory, so the agent's claims fall
+back to unverified at the next fetch.
 
 ## Domain-anchored identity
 
-ANS [draft-narajala-courtney-ansv2] and similar work anchor an agent to a
-domain the operator controls. This document is complementary: a hosted
-identity is for operators who have no domain, and an operator who later
-proves control of a domain publishes that as a `domain` check in the owner
-block. Nothing here prevents a provider from also issuing ANS records.
+ANS [ANS-0] [draft-narajala-courtney-ansv2] anchors every agent
+registration to one fully qualified domain name whose control the operator
+proves at registration time, and lets an operator hold Verified Identities
+(a `did:web` or `did:key` identifier, a Legal Entity Identifier or an ENS
+name), each proven by a control proof, sealed in a transparency log and
+linked to the operator's agents. An operator with a Legal Entity Identifier
+is therefore anchored to it directly, not through optional metadata. This
+document is complementary: a hosted identity is for operators who have no
+domain, and an operator who later proves control of a domain publishes that
+as a `domain` check in the owner block. Nothing here prevents a provider
+from also issuing ANS records.
+
+The lifecycles differ in one respect worth naming. ANS has a soft
+`DEPRECATED` state for a superseded version of an agent and the terminal
+states `REVOKED` and `EXPIRED`; it has no reversible suspension by the
+operator or the registry. The `suspended` status of this document
+(see "Lifecycle status") is reversible by design, and a relying party MUST NOT read it
+as terminal.
+
+A provider signature over the Agent Identity Document, and where the
+history of a document's changes would be recorded so that an unauthorised
+change is detectable afterwards, is under discussion with the ANS project
+and is not specified in this revision.
 
 ## Compatibility
 
@@ -396,7 +452,11 @@ The reference implementation has served this document at
 its version 0.3.0 and has been proposed for other formats. Providers
 SHOULD serve this document at `/.well-known/agent-identity.json` and MAY
 continue to serve it at `/.well-known/agent.json` during a transition; a
-relying party SHOULD try the former first.
+relying party SHOULD try the former first. A provider that continues to
+serve the old path SHOULD mark it with the `Deprecation` [RFC 9745] and
+`Sunset` [RFC 8594] header fields and a `Link` header field with the
+`successor-version` relation [RFC 5829] pointing at the new path; the
+reference implementation does so.
 
 # Security Considerations
 
@@ -436,11 +496,19 @@ address is not published, only that a check occurred and when. For a
 `domain` check the domain name is published, since control of a public name
 is itself public. For a `github` check the login is published, a pseudonym
 by GitHub's own design, and only because the account holder asked; nothing
-else read from GitHub is published. `account_since` reveals when the account was created and
-nothing else about the holder. A provider MUST let an account holder export
-and erase their data, and MUST remove an identity's document promptly on
-deletion; what the append-only audit trail retains is the provider's
-documented retention decision.
+else read from GitHub is published. `account_since` reveals when the account
+was created and nothing else about the holder. A provider MUST let an
+account holder export and erase their data, and MUST remove an identity's
+document promptly on deletion; what the append-only audit trail retains is
+the provider's documented retention decision.
+
+Where an identity also signs its requests (see "Signed requests"), each
+signed request names the identity hostname, so receivers can recognise that
+agent's requests and correlate them across origins, whatever key it uses
+(see Section 7.1 of [draft-ietf-webbotauth-httpsig-protocol]). When the
+account holder is a natural person, a provider SHOULD tell them so before
+enabling signing, and SHOULD NOT publish the person's name in the document
+unless they put it in operator-asserted text themselves.
 
 # IANA Considerations
 
@@ -517,8 +585,15 @@ describes a practice in production there.
 - [RFC 8659]: CAA
 - [RFC 9110]: HTTP semantics
 - [RFC 9421]: HTTP Message Signatures
+- [RFC 9745]: the Deprecation HTTP header field
+- [RFC 8594]: the Sunset HTTP header field
+- [RFC 5829]: link relations for versioned resources (`successor-version`)
 - [draft-ietf-webbotauth-httpsig-protocol]: Web Bot Auth
-- [draft-narajala-courtney-ansv2]: Agent Name Service v2
+- [draft-singh-webbotauth-hosted-directories]: Hosted Key Directories for Web Bot Auth
+- [draft-meunier-webbotauth-registry]: Web Bot Auth registry (the Signature Agent Card)
+- [draft-jovancevic-vicdm]: Verifiable Identity Classification Model
+- [ANS-0]: Agent Name Service, ANS-0: Identity, https://github.com/agentnameservice/ans-registry/blob/1e005c6eaf51759308932b96d76b1d5cb49e3e31/spec/ans-0-identity-anchor.md
+- [draft-narajala-courtney-ansv2]: Agent Name Service v2 (expired Internet-Draft)
 - [draft-pro-adp-agent-discovery]: Agent Discovery Protocol
 - [A2A]: Agent2Agent Protocol Specification, The Linux Foundation, https://a2a-protocol.org/latest/specification/
 - [knownAs.dev]: reference implementation, https://knownas.dev/

@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased (will be draft -02)
+## 2026-10-31 (draft -02 posted; expires 2027-05-04)
+
+- `draft-alla-agent-identity-document-02` posted at the IETF Datatracker
+  (submission 171536, confirmed by the author): https://datatracker.ietf.org/doc/draft-alla-agent-identity-document/02/
 
 - `draft/`: the source is renamed `-02` and carries the changes queued since
   `-01` (see its "Changes since -01"): no `submissiontype`; ANS described per

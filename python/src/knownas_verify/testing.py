@@ -41,6 +41,12 @@ def public_jwk(private_key: Ed25519PrivateKey) -> dict[str, str]:
     return {**key, "kid": jwk_thumbprint(key), "alg": "ed25519", "use": "sig"}
 
 
+def directory_url(host: str) -> str:
+    """The ``Signature-Agent`` value an agent on ``host`` sends under protocol
+    draft -01: the URL of its key directory."""
+    return f"https://{host}{DIRECTORY_PATH}"
+
+
 def directory_for(*private_keys: Ed25519PrivateKey) -> dict[str, list[dict[str, str]]]:
     return {"keys": [public_jwk(k) for k in private_keys]}
 
@@ -51,7 +57,8 @@ def sign_request(
     headers: Iterable[tuple[str, str]] = (),
     *,
     private_key: Ed25519PrivateKey = TEST_KEY,
-    agent_origin: str,
+    agent_origin: str | None = None,
+    agent_url: str | None = None,
     label: str = "sig1",
     agent_member: str | None = None,
     created: datetime | None = None,
@@ -61,17 +68,26 @@ def sign_request(
     include_alg: bool = True,
 ) -> Request:
     """``Request`` with Signature-Agent, Signature-Input and Signature added,
-    signed over ``components`` plus the Signature-Agent member."""
+    signed over ``components`` plus the Signature-Agent member.
+
+    Name the signer one of two ways. ``agent_url`` is sent as given: under
+    protocol draft -01 it is the key directory's URL, which
+    :func:`directory_url` builds from a host. ``agent_origin`` is sent as
+    given too, the bare-origin form of revision -00 that deployed signers
+    still use."""
+    agent_value = agent_url if agent_url is not None else agent_origin
+    if agent_value is None or (agent_origin is not None and agent_url is not None):
+        raise ValueError("pass exactly one of agent_url and agent_origin")
     keyid = public_jwk(private_key)["kid"]
     member = agent_member or label
     now = created or datetime.now(UTC)
     created_s = int(now.timestamp())
 
     if legacy_agent_form:
-        agent_header = sf.serialize_bare_item(agent_origin)
+        agent_header = sf.serialize_bare_item(agent_value)
         agent_component = sf.Item("signature-agent")
     else:
-        agent_header = f"{member}={sf.serialize_bare_item(agent_origin)}"
+        agent_header = f"{member}={sf.serialize_bare_item(agent_value)}"
         agent_component = sf.Item("signature-agent", {"key": member})
 
     items = [sf.Item(c) for c in components] + [agent_component]

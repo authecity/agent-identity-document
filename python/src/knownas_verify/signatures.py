@@ -2,12 +2,18 @@
 against the key its signer publishes, then the signer's identity.
 
 The signature follows HTTP Message Signatures (RFC 9421) as profiled by
-``draft-ietf-webbotauth-httpsig-protocol-00`` (the revision the reference
+``draft-ietf-webbotauth-httpsig-protocol-01`` (the revision the reference
 implementation's ADR 0039 pins). What this module makes binding:
 
 - the key is looked up by the **(URL, key) pair**, never by key alone
   (draft section 5.4): the directory fetched is the one named by the
   ``Signature-Agent`` member the signature covers;
+- the ``Signature-Agent`` value is the URL of the signer's key directory,
+  ``https://<host>/.well-known/http-message-signatures-directory``, fetched
+  as sent (section 5.5). A member that carries parameters is ignored
+  (section 5.2.1). A bare ``https`` origin, which revision -00 resolved to
+  that same directory, is still read that way and the check says so. A key
+  set at any other path names no identity and is not read;
 - a signature is attributed only to a ``Signature-Agent`` member it
   covers (draft section 5.2.2);
 - the three outcomes of Appendix C.1: ``verified``, ``invalid`` and
@@ -123,11 +129,10 @@ def verify_request(
         return _lone(request, "unverified", str(error), clock)
 
     try:
-        host = check_subject(urlsplit(agent_url).hostname or "")
-    except FetchError as error:
-        return _lone(request, "unverified", f"Signature-Agent {agent_url!r}: {error.detail}", clock)
+        host, directory_url, form = _directory_of(agent_url)
+    except _UnverifiedError as error:
+        return _lone(request, "unverified", str(error), clock)
 
-    directory_url = f"https://{host}{DIRECTORY_PATH}"
     directory_check, keys = read_directory(fetch, directory_url, timeout)
 
     try:
@@ -147,7 +152,7 @@ def verify_request(
         status_source=identity.status_source,
         observed_at=identity.observed_at,
         checks=(
-            Check("request.agent", "verified", agent_detail, source=agent_url),
+            Check("request.agent", "verified", f"{agent_detail}, {form}", source=agent_url),
             check,
             *identity.checks,
         ),
@@ -224,10 +229,9 @@ def _select(request: Request, label: str | None) -> tuple[str, sf.InnerList, byt
             or isinstance(member.value, sf.Token)
         ):
             raise _InvalidError(f"Signature-Agent has no String member {agent_key!r}")
-        type_param = member.params.get("type", sf.Token("directory"))
-        if str(type_param) != "directory":
+        if member.params:
             raise _UnverifiedError(
-                f"Signature-Agent type {type_param!r} is not supported; only directory is"
+                f"Signature-Agent member {agent_key!r} carries parameters, so it is ignored"
             )
         agent_value = member.value
         kind = f"member {agent_key!r}"
@@ -244,18 +248,48 @@ def _select(request: Request, label: str | None) -> tuple[str, sf.InnerList, byt
     else:
         raise _InvalidError("the signature does not cover a Signature-Agent member")
 
-    parts = urlsplit(agent_value)
-    if (
-        parts.scheme != "https"
-        or not parts.hostname
-        or parts.path not in ("", "/")
-        or parts.query
-        or parts.fragment
-    ):
+    return chosen, inner, sig_member.value, agent_value, kind
+
+
+def _directory_of(agent_value: str) -> tuple[str, str, str]:
+    """The identity host a ``Signature-Agent`` value names, the key directory
+    to fetch for it, and which form the value took.
+
+    Two forms name an identity: the directory's own URL (draft section 5.5,
+    and 4.5 for why the well-known path names the domain), and a bare origin,
+    which revision -00 resolved to that directory. Anything else is ignored.
+    """
+    ignored = f"Signature-Agent {agent_value!r}"
+    try:
+        parts = urlsplit(agent_value)
+        port = parts.port
+    except ValueError:
+        raise _UnverifiedError(f"{ignored} is not a URL, so the member is ignored") from None
+    if parts.scheme != "https" or not parts.hostname:
+        raise _UnverifiedError(f"{ignored} is not an https URL, so the member is ignored")
+    if parts.fragment or parts.username is not None or port not in (None, 443):
         raise _UnverifiedError(
-            f"Signature-Agent {agent_value!r} is not an https origin, so the member is ignored"
+            f"{ignored} carries a fragment, credentials or a port, so the member is ignored"
         )
-    return chosen, inner, sig_member.value, agent_value, f"{kind}, directory type, {agent_value}"
+    try:
+        host = check_subject(parts.hostname)
+    except FetchError as error:
+        raise _UnverifiedError(f"{ignored}: {error.detail}") from error
+    directory = f"https://{host}{DIRECTORY_PATH}"
+    if parts.path == DIRECTORY_PATH:
+        # Fetched as sent; the query is not part of the identifier (5.5).
+        sent = f"{directory}?{parts.query}" if parts.query else directory
+        return host, sent, f"key directory URL, {agent_value}"
+    if parts.path in ("", "/") and not parts.query:
+        return (
+            host,
+            directory,
+            f"bare origin, read as its well-known key directory (the -00 form), {agent_value}",
+        )
+    raise _UnverifiedError(
+        f"{ignored} is neither a key directory at {DIRECTORY_PATH} nor a bare origin, "
+        "so it names no identity and the member is ignored"
+    )
 
 
 def _verify_one(

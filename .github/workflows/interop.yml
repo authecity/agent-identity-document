@@ -36,10 +36,12 @@ jobs:
         run: |
           python knownas.py sign | node cloudflare.mjs verify | tee a.out && grep -q '"outcome":"verified"' a.out
           python knownas.py sign --legacy | node cloudflare.mjs verify | tee b.out && grep -q '"outcome":"verified"' b.out
+          python knownas.py sign --directory-url | node cloudflare.mjs verify | tee b2.out && grep -q '"outcome":"verified"' b2.out
       - name: Cloudflare signs, knownAs verifies (dictionary and legacy forms)
         run: |
           node cloudflare.mjs sign | python knownas.py verify | tee c.out && grep -q '"outcome": "verified"' c.out
           node cloudflare.mjs sign https://api.example/o https://signature-agent.test --legacy | python knownas.py verify | tee d.out && grep -q '"outcome": "verified"' d.out
+          node cloudflare.mjs sign https://api.example/o https://signature-agent.test/.well-known/http-message-signatures-directory | python knownas.py verify | tee d2.out && grep -q '"outcome": "verified"' d2.out
       - name: The known divergence still holds (no alg is rejected by Cloudflare, accepted by knownAs)
         run: |
           python knownas.py sign --no-alg > e.json

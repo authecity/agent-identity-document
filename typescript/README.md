@@ -42,7 +42,13 @@ require(v, "request.signature", "owner.domain");
 ```
 
 `verifyRequest` follows HTTP Message Signatures (RFC 9421) as profiled by
-`draft-ietf-webbotauth-httpsig-protocol-00`: the key is looked up by the
+`draft-ietf-webbotauth-httpsig-protocol-01`. A `Signature-Agent` value names
+an identity when it is the URL of the signer's key directory
+(`https://<host>/.well-known/http-message-signatures-directory`, what -01 has
+an agent send, fetched as sent) or a bare origin (`https://<host>`, the -00
+form deployed signers still send, read as that directory and reported as
+such in `request.agent`). A key set at another path, or a member that carries
+parameters, is `unverified`. The key is looked up by the
 **(URL, key) pair** from the directory of the `Signature-Agent` member the
 signature covers, never by key alone; `created`, `expires`, `keyid` and
 `tag="web-bot-auth"` are required and `expires` is enforced by your clock;

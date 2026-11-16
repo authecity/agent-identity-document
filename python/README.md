@@ -48,7 +48,7 @@ reads the A2A agent card, and never connects to the agent's endpoints.
 
 `verify_request` checks an HTTP request signed under Web Bot Auth (HTTP
 Message Signatures, RFC 9421, as profiled by
-`draft-ietf-webbotauth-httpsig-protocol-00`), then reads the signer's
+`draft-ietf-webbotauth-httpsig-protocol-01`), then reads the signer's
 identity as above:
 
 ```python
@@ -65,6 +65,19 @@ v.check("request.agent")       # which Signature-Agent member the signature cove
 v.check("request.signature")   # verified | invalid | unverified, with the label, key and covered components
 require(v, "request.signature", "owner.domain")
 ```
+
+Which `Signature-Agent` values name an identity:
+
+- the URL of the signer's key directory,
+  `https://<host>/.well-known/http-message-signatures-directory`. This is
+  what revision -01 of the protocol draft has an agent send, and it is
+  fetched as sent;
+- a bare origin, `https://<host>`, which revision -00 resolved to that same
+  directory and deployed signers still send. It is read that way, and
+  `request.agent` says so;
+- nothing else. A key set at another path names no identity, and a member
+  that carries parameters (`;type=...`) is ignored, as -01 requires. Both
+  are `unverified`.
 
 What it makes binding: the key is looked up by the **(URL, key) pair**, from
 the directory of the `Signature-Agent` member the signature covers, never by

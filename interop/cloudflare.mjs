@@ -73,7 +73,7 @@ if (mode === "vectors") {
   const agent = process.argv[4] ?? "https://signature-agent.test";
   const legacy = process.argv.includes("--legacy");
   const label = "sig1";
-  const signatureAgent = legacy ? `"${agent}"` : `${label}="${agent}";type=directory`;
+  const signatureAgent = legacy ? `"${agent}"` : `${label}="${agent}"`;
   const request = new Request(url, { method: "GET", headers: { "Signature-Agent": signatureAgent } });
   const now = new Date();
   const fields = await sign(request, {

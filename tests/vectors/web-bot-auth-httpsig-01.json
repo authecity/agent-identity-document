@@ -1,0 +1,88 @@
+{
+  "source": "draft-ietf-webbotauth-httpsig-protocol-01, Appendix E.2.1 (EdDSA using curve edwards25519); request from RFC 9421 Appendix B.2 (test-request); key from RFC 9421 Appendix B.1.4 (test-key-ed25519). E.2.2 is unchanged from -00 and stays in web-bot-auth-httpsig-00.json",
+  "source_sha256": "28d85996810063563cd3fd65611275b2b118d7dbc68d380bc51c24b180ba1193",
+  "note": "The draft's vector sends a bare origin. Section 5.5 of -01 has a verifier fetch that URL as the key set; this library reads a bare origin as the well-known directory on it, the -00 behaviour, and says so in request.agent.",
+  "directory": {
+    "url": "https://signature-agent.test/.well-known/http-message-signatures-directory",
+    "content_type": "application/http-message-signatures-directory+json",
+    "body": "{\"keys\":[{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"kid\":\"poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U\",\"x\":\"JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs\",\"use\":\"sig\"}]}",
+    "content_digest": "sha-256=:CADMT2aBdV/rqQr/NIru64ERQkCobVvllA4V0fLFDu0=:"
+  },
+  "cases": [
+    {
+      "name": "E.2.1 Signature-Agent member keyed to the signature label",
+      "now": "2026-10-14T12:00:00Z",
+      "request": {
+        "method": "POST",
+        "url": "https://example.com/foo?param=Value&Pet=dog",
+        "headers": [
+          [
+            "Host",
+            "example.com"
+          ],
+          [
+            "Date",
+            "Tue, 20 Apr 2021 02:07:55 GMT"
+          ],
+          [
+            "Content-Type",
+            "application/json"
+          ],
+          [
+            "Signature-Agent",
+            "sig2=\"https://signature-agent.test\""
+          ],
+          [
+            "Signature-Input",
+            "sig2=(\"@authority\" \"signature-agent\";key=\"sig2\");created=1735689600;keyid=\"poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U\";alg=\"ed25519\";expires=4889289600;nonce=\"n9p433xm+NJ3ph3upfBIGmsuwHw387YV7Q/F+6BSpGCVjYCqQw6rznNA8PVVLySrAWsv0hQtFioQb6E1YsauiA==\";tag=\"web-bot-auth\""
+          ],
+          [
+            "Signature",
+            "sig2=:CGokAoY/FrPpyuzTe1Fb2kLTAH9Idw6qSFd1+D77r1firsMRCxeuLu5e6O+ek3zQgDMAzjiXtLVfqE00xnABCQ==:"
+          ]
+        ]
+      },
+      "signature_base": "\"@authority\": example.com\n\"signature-agent\";key=\"sig2\": \"https://signature-agent.test\"\n\"@signature-params\": (\"@authority\" \"signature-agent\";key=\"sig2\");created=1735689600;keyid=\"poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U\";alg=\"ed25519\";expires=4889289600;nonce=\"n9p433xm+NJ3ph3upfBIGmsuwHw387YV7Q/F+6BSpGCVjYCqQw6rznNA8PVVLySrAWsv0hQtFioQb6E1YsauiA==\";tag=\"web-bot-auth\"",
+      "expected": {
+        "request.signature": "verified",
+        "request.agent": "verified",
+        "agent_detail_contains": "bare origin"
+      },
+      "label": "sig2"
+    },
+    {
+      "name": "The key directory URL as the Signature-Agent value (section 5.5)",
+      "now": "2026-11-15T12:00:00Z",
+      "origin": "made with knownas_verify.testing.sign_request and the RFC 9421 test key; not from the draft, whose own vector sends a bare origin",
+      "request": {
+        "method": "GET",
+        "url": "https://api.example/orders",
+        "headers": [
+          [
+            "Host",
+            "api.example"
+          ],
+          [
+            "Signature-Agent",
+            "sig1=\"https://signature-agent.test/.well-known/http-message-signatures-directory\""
+          ],
+          [
+            "Signature-Input",
+            "sig1=(\"@authority\" \"@method\" \"signature-agent\";key=\"sig1\");created=1794744000;alg=\"ed25519\";expires=2110104000;keyid=\"poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U\";nonce=\"lj3hUtjdDm6lnMHkwFh3j692fT74gXANUMNdpYjeZraXemKH4rSqF9EWhN5YMlIzSZhXOvlakLx74YqCJfduTQ==\";tag=\"web-bot-auth\""
+          ],
+          [
+            "Signature",
+            "sig1=:6YPe/LXtc9a0+cFczJ9KQM9DprKg6eDFQKI1tQlalIESWyyPVtce+05txE/m1Vf1Trbo7WyNXuqJsjhLLZcaAg==:"
+          ]
+        ]
+      },
+      "signature_base": "\"@authority\": api.example\n\"@method\": GET\n\"signature-agent\";key=\"sig1\": \"https://signature-agent.test/.well-known/http-message-signatures-directory\"\n\"@signature-params\": (\"@authority\" \"@method\" \"signature-agent\";key=\"sig1\");created=1794744000;alg=\"ed25519\";expires=2110104000;keyid=\"poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U\";nonce=\"lj3hUtjdDm6lnMHkwFh3j692fT74gXANUMNdpYjeZraXemKH4rSqF9EWhN5YMlIzSZhXOvlakLx74YqCJfduTQ==\";tag=\"web-bot-auth\"",
+      "label": "sig1",
+      "expected": {
+        "request.signature": "verified",
+        "request.agent": "verified",
+        "agent_detail_contains": "key directory URL"
+      }
+    }
+  ]
+}

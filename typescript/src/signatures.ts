@@ -3,7 +3,7 @@
  * against the key its signer publishes, then the signer's identity.
  *
  * HTTP Message Signatures (RFC 9421) as profiled by
- * `draft-ietf-webbotauth-httpsig-protocol-00`, the revision the reference
+ * `draft-ietf-webbotauth-httpsig-protocol-01`, the revision the reference
  * implementation's ADR 0039 pins. Binding here: the key is looked up by the
  * (URL, key) pair, never by key alone; a signature is attributed only to a
  * Signature-Agent member it covers; the three outcomes of Appendix C.1, with
@@ -86,14 +86,14 @@ export async function verifyRequest(request: Request, options: VerifyRequestOpti
     throw error;
   }
 
-  let host: string;
+  let named: Named;
   try {
-    host = checkSubject(new URL(selected.agentUrl).hostname);
+    named = directoryOf(selected.agentUrl);
   } catch (error) {
-    return lone(clock, "unverified", `Signature-Agent ${pyRepr(selected.agentUrl)}: ${(error as FetchError).detail}`);
+    if (error instanceof Unverified) return lone(clock, "unverified", error.message);
+    throw error;
   }
-
-  const directoryUrl = `https://${host}${DIRECTORY_PATH}`;
+  const { host, directoryUrl } = named;
   const [directoryCheck, keys] = await readDirectory(fetch, directoryUrl, timeout);
 
   let signature: Check;
@@ -113,7 +113,11 @@ export async function verifyRequest(request: Request, options: VerifyRequestOpti
     status: identity.status,
     status_source: identity.status_source,
     observed_at: identity.observed_at,
-    checks: [check("request.agent", "verified", selected.agentDetail, { source: selected.agentUrl }), signature, ...identity.checks],
+    checks: [
+      check("request.agent", "verified", `${selected.agentDetail}, ${named.form}`, { source: selected.agentUrl }),
+      signature,
+      ...identity.checks,
+    ],
     document: identity.document,
   });
 }
@@ -201,9 +205,8 @@ function select(request: Request, label: string | undefined): Selected {
     if (member === undefined || member.kind !== "item" || !isString(member.value)) {
       throw new Invalid(`Signature-Agent has no String member ${pyRepr(agentKey)}`);
     }
-    const typeParam = member.params.has("type") ? String(member.params.get("type")) : "directory";
-    if (typeParam !== "directory") {
-      throw new Unverified(`Signature-Agent type ${pyRepr(typeParam)} is not supported; only directory is`);
+    if (member.params.size > 0) {
+      throw new Unverified(`Signature-Agent member ${pyRepr(agentKey)} carries parameters, so it is ignored`);
     }
     agentValue = member.value;
     kind = `member ${pyRepr(agentKey)}`;
@@ -221,29 +224,55 @@ function select(request: Request, label: string | undefined): Selected {
     throw new Invalid("the signature does not cover a Signature-Agent member");
   }
 
-  let parts: URL | undefined;
+  return { label: chosen, inner, signature: sigMember.value, agentUrl: agentValue, agentDetail: kind };
+}
+
+interface Named {
+  host: string;
+  directoryUrl: string;
+  form: string;
+}
+
+/** The identity host a `Signature-Agent` value names, the key directory to
+ * fetch for it, and which form the value took. Two forms name an identity:
+ * the directory's own URL (draft section 5.5, and 4.5 for why the well-known
+ * path names the domain), and a bare origin, which revision -00 resolved to
+ * that directory. Anything else is ignored. */
+function directoryOf(agentValue: string): Named {
+  const ignored = `Signature-Agent ${pyRepr(agentValue)}`;
+  let parts: URL;
   try {
     parts = new URL(agentValue);
   } catch {
-    parts = undefined;
+    throw new Unverified(`${ignored} is not a URL, so the member is ignored`);
   }
-  if (
-    parts === undefined ||
-    parts.protocol !== "https:" ||
-    !parts.hostname ||
-    (parts.pathname !== "" && parts.pathname !== "/") ||
-    parts.search ||
-    parts.hash
-  ) {
-    throw new Unverified(`Signature-Agent ${pyRepr(agentValue)} is not an https origin, so the member is ignored`);
+  if (parts.protocol !== "https:" || !parts.hostname) {
+    throw new Unverified(`${ignored} is not an https URL, so the member is ignored`);
   }
-  return {
-    label: chosen,
-    inner,
-    signature: sigMember.value,
-    agentUrl: agentValue,
-    agentDetail: `${kind}, directory type, ${agentValue}`,
-  };
+  if (agentValue.includes("#") || parts.username || parts.password || parts.port) {
+    throw new Unverified(`${ignored} carries a fragment, credentials or a port, so the member is ignored`);
+  }
+  let host: string;
+  try {
+    host = checkSubject(parts.hostname);
+  } catch (error) {
+    throw new Unverified(`${ignored}: ${(error as FetchError).detail}`);
+  }
+  const directory = `https://${host}${DIRECTORY_PATH}`;
+  if (parts.pathname === DIRECTORY_PATH) {
+    // Fetched as sent; the query is not part of the identifier (5.5).
+    return { host, directoryUrl: `${directory}${parts.search}`, form: `key directory URL, ${agentValue}` };
+  }
+  if (parts.pathname === "/" && !agentValue.includes("?")) {
+    return {
+      host,
+      directoryUrl: directory,
+      form: `bare origin, read as its well-known key directory (the -00 form), ${agentValue}`,
+    };
+  }
+  throw new Unverified(
+    `${ignored} is neither a key directory at ${DIRECTORY_PATH} nor a bare origin, so it names no identity and the member is ignored`,
+  );
 }
 
 async function verifyOne(

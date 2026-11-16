@@ -21,7 +21,14 @@ python knownas.py sign --legacy | node cloudflare.mjs verify   # 3. same, legacy
 python knownas.py sign --no-alg | node cloudflare.mjs verify   # 4. same, without the optional alg
 node cloudflare.mjs sign | python knownas.py verify            # 5. Cloudflare signs, knownAs verifies
 node cloudflare.mjs sign https://api.example/o https://signature-agent.test --legacy | python knownas.py verify
+# 6. the key directory's URL as the Signature-Agent value (protocol draft -01), each way
+python knownas.py sign --directory-url | node cloudflare.mjs verify
+node cloudflare.mjs sign https://api.example/o https://signature-agent.test/.well-known/http-message-signatures-directory | python knownas.py verify
 ```
+
+Since 2026-11-15 `cloudflare.mjs sign` sends its dictionary member without
+`;type=directory`: revision -01 removed that parameter and has a verifier
+ignore any member that carries one, which `knownas-verify` now does.
 
 `knownas-verify`'s own run over the vectors is `python/tests/test_signatures.py`
 (signature bases byte for byte, then both signatures). The signer on the

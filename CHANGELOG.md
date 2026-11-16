@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-11-15 (the verifier follows protocol draft -01)
+
+- `python/`, `typescript/`: `verify_request` / `verifyRequest` follow
+  `draft-ietf-webbotauth-httpsig-protocol-01` (29 October 2026) for the
+  `Signature-Agent` value. It is now the URL of the signer's key directory,
+  `https://<host>/.well-known/http-message-signatures-directory`, fetched as
+  sent; before, only a bare origin was accepted and that URL came back
+  `unverified`. A bare origin is still read as the directory on that host
+  (the -00 form, which the draft's own vector and deployed signers still
+  send) and `request.agent` says which form it saw. A member that carries
+  parameters is ignored, as -01 requires: `;type=directory` no longer
+  verifies. A key set at any other path, a port, credentials or a fragment
+  is `unverified`. The detail text of `request.agent` changed.
+- `python/`: `knownas_verify.testing.sign_request` takes `agent_url` (sent
+  as given) beside `agent_origin`, exactly one of them; `directory_url(host)`
+  builds the -01 value.
+- `tests/vectors/web-bot-auth-httpsig-01.json`: Appendix E.2.1 of -01 (the
+  member is keyed to the signature label, with a new signature), and one
+  case of our own that sends the directory URL. Both packages run both.
+- `interop/`: both directions also exchange the directory-URL form with
+  Cloudflare's library, and `cloudflare.mjs` no longer sends `type`.
+- Not changed here: the spec's "Signed requests" paragraph still calls the
+  bare origin the natural value. It is queued for the next draft.
+
 ## 2026-10-31 (draft -02 posted; expires 2027-05-04)
 
 - `draft-alla-agent-identity-document-02` posted at the IETF Datatracker

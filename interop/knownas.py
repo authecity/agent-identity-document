@@ -21,7 +21,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from knownas_verify import Request, verify_request
 from knownas_verify.fetch import RecordedFetcher, Response
-from knownas_verify.testing import sign_request
+from knownas_verify.testing import directory_url, sign_request
 
 HERE = Path(__file__).resolve().parent
 VECTORS = json.loads(
@@ -69,7 +69,11 @@ def main() -> int:
             "https://api.example/orders?x=1",
             [],
             private_key=TEST_PRIVATE,
-            agent_origin="https://signature-agent.test",
+            **(
+                {"agent_url": directory_url("signature-agent.test")}
+                if "--directory-url" in sys.argv
+                else {"agent_origin": "https://signature-agent.test"}
+            ),
             created=datetime.now(UTC),
             legacy_agent_form="--legacy" in sys.argv,
             include_alg="--no-alg" not in sys.argv,

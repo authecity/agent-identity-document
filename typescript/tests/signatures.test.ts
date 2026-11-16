@@ -194,12 +194,70 @@ test("a signature must cover a Signature-Agent member and carry the tag", async 
   assert.ok(v2.check("request.signature")?.detail?.includes("no signature carries tag"));
 });
 
-test("a non-origin Signature-Agent member is ignored", async () => {
-  const c = caseNamed(E21);
-  const r = withHeader(requestOf(c), "Signature-Agent", 'agent2="https://signature-agent.test/keys.json"');
-  const v = await verifyRequest(r, { fetcher: fetcher(), now: new Date(c.now), allowTestKeys: true });
-  assert.equal(v.check("request.signature")?.outcome, "unverified");
-  assert.ok(v.check("request.signature")?.detail?.includes("not an https origin"));
+for (const [value, why] of [
+  ['agent2="https://signature-agent.test/keys.json"', "names no identity"],
+  ['agent2="https://signature-agent.test/?x=1"', "names no identity"],
+  ['agent2="http://signature-agent.test"', "not an https URL"],
+  ['agent2="https://signature-agent.test:8443"', "a port"],
+  ['agent2="https://signature-agent.test";type=directory', "carries parameters"],
+  ['agent2="https://signature-agent.test";type=cimd', "carries parameters"],
+] as const) {
+  test(`a Signature-Agent member that names no identity is ignored: ${value}`, async () => {
+    const c = caseNamed(E21);
+    const f = fetcher();
+    const r = withHeader(requestOf(c), "Signature-Agent", value);
+    const v = await verifyRequest(r, { fetcher: f, now: new Date(c.now), allowTestKeys: true });
+    assert.equal(v.check("request.signature")?.outcome, "unverified");
+    assert.ok(v.check("request.signature")?.detail?.includes(why), v.check("request.signature")?.detail);
+    assert.equal(v.subject, "");
+    assert.deepEqual(f.calls, []);
+  });
+}
+
+// -- protocol draft -01: the value is the key directory's URL ----------------
+
+interface Case01 {
+  name: string;
+  now: string;
+  label: string;
+  request: { method: string; url: string; headers: Array<[string, string]> };
+  signature_base: string;
+  expected: { "request.signature": string; agent_detail_contains: string };
+}
+
+const vectors01 = JSON.parse(readFileSync(`${VECTORS}web-bot-auth-httpsig-01.json`, "utf8")) as { cases: Case01[] };
+
+function request01(c: Case01): Request {
+  return new Request(c.request.method, c.request.url, c.request.headers);
+}
+
+for (const c of vectors01.cases) {
+  test(`-01 vector: ${c.name}`, async () => {
+    const request = request01(c);
+    const inputs = parseDictionary(request.fieldValue("signature-input") ?? "");
+    const inner = inputs.get(c.label);
+    assert.ok(inner !== undefined && inner.kind === "inner-list");
+    assert.equal(signatureBase(request, inner), c.signature_base);
+    const f = fetcher();
+    const v = await verifyRequest(request, { fetcher: f, now: new Date(c.now), allowTestKeys: true });
+    assert.equal(v.check("request.signature")?.outcome, c.expected["request.signature"]);
+    assert.equal(v.subject, "signature-agent.test");
+    assert.ok(v.check("request.agent")?.detail?.includes(c.expected.agent_detail_contains));
+    assert.ok(f.calls.includes(DIRECTORY_URL));
+  });
+}
+
+test("the key directory URL is fetched as sent", async () => {
+  const c = vectors01.cases[1]!;
+  const sent = `${DIRECTORY_URL}?v=2`;
+  const f = fetcher({ [sent]: DIRECTORY });
+  const r = withHeader(request01(c), "Signature-Agent", `sig1="${sent}"`);
+  const v = await verifyRequest(r, { fetcher: f, now: new Date(c.now), allowTestKeys: true });
+  // The header changed after signing, so the signature no longer verifies;
+  // what this asserts is which URL was fetched and which identity it named.
+  assert.equal(v.check("request.signature")?.outcome, "invalid");
+  assert.equal(v.subject, "signature-agent.test");
+  assert.equal(f.calls[0], sent);
 });
 
 test("an unsigned request is unverified and touches no network", async () => {
